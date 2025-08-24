@@ -1,5 +1,4 @@
 #include "dvc_MCU_comm.h"
-
 #include "dvc_motor_dm.hpp"
 
 void Class_MCU_Comm::Init(
@@ -49,17 +48,36 @@ void Class_MCU_Comm::Task()
 
 void Class_MCU_Comm::CAN_Send_Command()
 {
-     // static uint8_t CAN_Tx_Frame[8];
-     // CAN_Tx_Frame[0] = MCU_Comm_Data.Start_Of_Frame;
-     // CAN_Tx_Frame[1] = MCU_Comm_Data.Yaw_Angle;
-     // CAN_Tx_Frame[2] = MCU_Comm_Data.Pitch_Angle;
-     // CAN_Tx_Frame[3] = MCU_Comm_Data.Chassis_Direction;
-     // CAN_Tx_Frame[4] = MCU_Comm_Data.Chassis_Speed;
-     // CAN_Tx_Frame[5] = MCU_Comm_Data.Chassis_Rotation;
-     // CAN_Tx_Frame[6] = MCU_Comm_Data.Chassis_Spin;
-     // CAN_Tx_Frame[7] = MCU_Comm_Data.Booster;
-     //
-     // CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, CAN_Tx_Frame, 8);
+     static uint8_t CAN_Tx_Frame[8];
+     CAN_Tx_Frame[0] = MCU_Send_Data.Start_Of_Frame;
+     CAN_Tx_Frame[1] = MCU_Send_Data.Armor;
+     // 把 float 转换成字节
+     union { float f; uint8_t b[4]; } conv;
+
+     conv.f = MCU_Send_Data.Yaw;
+     CAN_Tx_Frame[2] = conv.b[0];
+     CAN_Tx_Frame[3] = conv.b[1];
+     CAN_Tx_Frame[4] = conv.b[2];
+     CAN_Tx_Frame[5] = conv.b[3];
+     CAN_Tx_Frame[6] = 0x00;
+     CAN_Tx_Frame[7] = 0x00;
+
+     // 发送第一帧（8字节）
+     CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, CAN_Tx_Frame, 8);
+
+     // ---- 第2帧：Pitch 的 4 个字节 ----
+     conv.f = MCU_Send_Data.Pitch;
+     CAN_Tx_Frame[0] = conv.b[0];
+     CAN_Tx_Frame[1] = conv.b[1];
+     CAN_Tx_Frame[2] = conv.b[2];
+     CAN_Tx_Frame[3] = conv.b[3];
+     CAN_Tx_Frame[4] = 0xBA;
+     CAN_Tx_Frame[5] = 0x00;
+     CAN_Tx_Frame[6] = 0x00;
+     CAN_Tx_Frame[7] = 0x00;
+
+     // 发送第二帧（8字节）
+     CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, CAN_Tx_Frame, 8);
 }
 
 

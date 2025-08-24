@@ -67,12 +67,12 @@ void Device_CAN3_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
 {
     switch (CAN_RxMessage->Header.Identifier)
     {
-        case (0x01):
+        case (0x12)://01
         {
             Robot.Gimbal.Motor_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
             break;
         }
-        case (0x02):
+        case (0x11)://02
         {
             Robot.Gimbal.Motor_Pitch.CAN_RxCpltCallback(CAN_RxMessage->Data);
             break;

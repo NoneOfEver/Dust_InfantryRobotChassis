@@ -18,12 +18,21 @@ struct Struct_MCU_Comm_Data
     uint8_t Booster;            // 发射机构：准备、发射
 };
 
+struct Struct_MCU_Send_Data
+{
+    uint8_t Start_Of_Frame = 0xAB;
+    uint8_t Armor;
+    float Yaw;   // 4字节浮点数
+    float Pitch; // 4字节浮点数
+};
+
 
 class Class_MCU_Comm
 {
 public:
 
     volatile Struct_MCU_Comm_Data MCU_Comm_Data;
+    Struct_MCU_Send_Data MCU_Send_Data;
 
     void Init(FDCAN_HandleTypeDef *hcan,
               uint8_t __CAN_Rx_ID,

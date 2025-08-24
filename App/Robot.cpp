@@ -21,7 +21,7 @@ void Class_Robot::Init()
     HAL_Delay(3000);
     static const osThreadAttr_t RobotTaskAttr = {
         .name = "RobotTask",
-        .stack_size = 512,
+        .stack_size = 768,
         .priority = (osPriority_t) osPriorityNormal
     };
     // 启动任务，将 this 传入
@@ -56,8 +56,15 @@ void Class_Robot::Task()
         Chassis.Set_Target_Velocity_Y((MCU_Comm_Data_Local.Chassis_Speed_Y - 127.0f) * 9.0f / 128.0f);
         Chassis.Set_Target_Velocity_Rotation((MCU_Comm_Data_Local.Chassis_Rotation - 127.0f) * 6.0f / 128.0f);
 
-        Gimbal.Motor_Yaw.Set_Control_Omega((MCU_Comm_Data_Local.Yaw - 127.0f) * 3.0f / 128.0f);
-        //Gimbal.Motor_Pitch.Set_Control_Angle((MCU_Comm_Data_Local.Pitch_Angle - 127.0f) * 0.002f);
+        // Gimbal.Motor_Yaw.Set_Control_Omega((MCU_Comm_Data_Local.Yaw - 127.0f) * 3.0f / 128.0f);
+        // Gimbal.Motor_Pitch.Set_Control_Angle((MCU_Comm_Data_Local.Pitch_Angle - 127.0f) * 0.009375f);
+        Gimbal.Set_Target_Yaw_Omega((MCU_Comm_Data_Local.Yaw - 127.0f) * 3.0f / 128.0f);
+        Gimbal.Set_Target_Pitch_Angle((MCU_Comm_Data_Local.Pitch_Angle - 127.0f) * 0.009375f);
+
+        MCU_Comm.MCU_Send_Data.Armor = 0x00;
+        MCU_Comm.MCU_Send_Data.Yaw = Gimbal.Get_Now_Yaw_Angle();
+        MCU_Comm.MCU_Send_Data.Pitch = Gimbal.Get_Now_Pitch_Angle();
+        MCU_Comm.CAN_Send_Command();
         osDelay(pdMS_TO_TICKS(10));
     }
 }
