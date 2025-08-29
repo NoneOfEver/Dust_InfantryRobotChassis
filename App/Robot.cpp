@@ -45,6 +45,8 @@ void Class_Robot::Task()
     MCU_Comm_Data_Local.Chassis_Rotation    = 127;
     MCU_Comm_Data_Local.Chassis_Spin        = 0;
     MCU_Comm_Data_Local.Booster             = 0;
+
+
     for (;;)
     {
         // 用临界区一次性复制，避免撕裂
@@ -56,10 +58,15 @@ void Class_Robot::Task()
         Chassis.Set_Target_Velocity_Y((MCU_Comm_Data_Local.Chassis_Speed_Y - 127.0f) * 9.0f / 128.0f);
         Chassis.Set_Target_Velocity_Rotation((MCU_Comm_Data_Local.Chassis_Rotation - 127.0f) * 6.0f / 128.0f);
 
-        // Gimbal.Motor_Yaw.Set_Control_Omega((MCU_Comm_Data_Local.Yaw - 127.0f) * 3.0f / 128.0f);
-        // Gimbal.Motor_Pitch.Set_Control_Angle((MCU_Comm_Data_Local.Pitch_Angle - 127.0f) * 0.009375f);
-        Gimbal.Set_Target_Yaw_Omega((MCU_Comm_Data_Local.Yaw - 127.0f) * 3.0f / 128.0f);
-        Gimbal.Set_Target_Pitch_Angle((MCU_Comm_Data_Local.Pitch_Angle - 127.0f) * 0.009375f);
+        // // 遥控模式
+        // Gimbal.Set_Target_Yaw_Omega((MCU_Comm_Data_Local.Yaw - 127.0f) * 3.0f / 128.0f);
+        // Gimbal.Set_Target_Pitch_Angle((MCU_Comm_Data_Local.Pitch_Angle - 127.0f) * 0.009375f);
+
+        // 自瞄模式
+        memcpy(&MCU_Comm.MCU_AutoAim_Data.Pitch_f,MCU_Comm.MCU_AutoAim_Data.Pitch,sizeof(float));
+        Gimbal.Set_Target_Pitch_Angle(Gimbal.Get_Now_Pitch_Angle() + MCU_Comm.MCU_AutoAim_Data.Pitch_f);
+        // memcpy(&MCU_Comm.MCU_AutoAim_Data.Yaw_f,MCU_Comm.MCU_AutoAim_Data.Yaw,sizeof(float));
+        // Gimbal.Yaw_Angle_PID.Set_Target(Gimbal.Get_Now_Yaw_Angle() + MCU_Comm.MCU_AutoAim_Data.Yaw_f);
 
         MCU_Comm.MCU_Send_Data.Armor = 0x00;
         MCU_Comm.MCU_Send_Data.Yaw = Gimbal.Get_Now_Yaw_Angle();

@@ -26,6 +26,15 @@ struct Struct_MCU_Send_Data
     float Pitch; // 4字节浮点数
 };
 
+struct Struct_MCU_AutoAim_Data
+{
+    uint8_t Start_Of_Yaw_Frame;
+    uint8_t Start_Of_Pitch_Frame;
+    uint8_t Yaw[4];
+    float Yaw_f;
+    uint8_t Pitch[4];
+    float Pitch_f;
+};
 
 class Class_MCU_Comm
 {
@@ -34,6 +43,12 @@ public:
     volatile Struct_MCU_Comm_Data MCU_Comm_Data;
     Struct_MCU_Send_Data MCU_Send_Data;
 
+    Struct_MCU_AutoAim_Data MCU_AutoAim_Data = {
+        0xAC,
+        0xAD,
+        {0},
+        {0},
+    };
     void Init(FDCAN_HandleTypeDef *hcan,
               uint8_t __CAN_Rx_ID,
               uint8_t __CAN_Tx_ID

@@ -86,12 +86,36 @@ void Class_MCU_Comm::CAN_RxCpltCallback(uint8_t* Rx_Data)
      // 判断在线
 
      // 处理数据 , 解包
-     MCU_Comm_Data.Start_Of_Frame       = Rx_Data[0];
-     MCU_Comm_Data.Yaw                  = Rx_Data[1];
-     MCU_Comm_Data.Pitch_Angle          = Rx_Data[2];
-     MCU_Comm_Data.Chassis_Speed_X      = Rx_Data[3];
-     MCU_Comm_Data.Chassis_Speed_Y      = Rx_Data[4];
-     MCU_Comm_Data.Chassis_Rotation     = Rx_Data[5];
-     MCU_Comm_Data.Chassis_Spin         = Rx_Data[6];
-     MCU_Comm_Data.Booster              = Rx_Data[7];
+     switch (Rx_Data[0])
+     {
+          case 0xAB: // 遥控包
+               MCU_Comm_Data.Start_Of_Frame       = Rx_Data[0];
+               MCU_Comm_Data.Yaw                  = Rx_Data[1];
+               MCU_Comm_Data.Pitch_Angle          = Rx_Data[2];
+               MCU_Comm_Data.Chassis_Speed_X      = Rx_Data[3];
+               MCU_Comm_Data.Chassis_Speed_Y      = Rx_Data[4];
+               MCU_Comm_Data.Chassis_Rotation     = Rx_Data[5];
+               MCU_Comm_Data.Chassis_Spin         = Rx_Data[6];
+               MCU_Comm_Data.Booster              = Rx_Data[7];
+               break;
+
+          case 0xAC: // 自瞄yaw包
+               MCU_AutoAim_Data.Start_Of_Yaw_Frame = Rx_Data[0];
+               MCU_AutoAim_Data.Yaw[0]             = Rx_Data[1];
+               MCU_AutoAim_Data.Yaw[1]             = Rx_Data[2];
+               MCU_AutoAim_Data.Yaw[2]             = Rx_Data[3];
+               MCU_AutoAim_Data.Yaw[3]             = Rx_Data[4];
+               break;
+          case 0xAD: // 自瞄pitch包
+               MCU_AutoAim_Data.Start_Of_Yaw_Frame = Rx_Data[0];
+               MCU_AutoAim_Data.Pitch[0]           = Rx_Data[1];
+               MCU_AutoAim_Data.Pitch[1]           = Rx_Data[2];
+               MCU_AutoAim_Data.Pitch[2]           = Rx_Data[3];
+               MCU_AutoAim_Data.Pitch[3]           = Rx_Data[4];
+               break;
+
+          default:
+               break;
+     }
+
 }

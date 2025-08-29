@@ -16,10 +16,12 @@ void Class_Gimbal::Init()
 
     //Motor_Yaw.Set_K_P(0);
     Motor_Yaw.Set_K_P(0); //MIT模式kp
-    Motor_Pitch.Set_K_P(3);
+    // Motor_Pitch.Set_K_P(3); // 3
+    Motor_Pitch.Set_K_P(25);
 
     Motor_Yaw.Set_K_D(0.3); // MIT模式kd
-    Motor_Pitch.Set_K_D(0.03);
+    // Motor_Pitch.Set_K_D(0.03);
+    Motor_Pitch.Set_K_D(0.06);
 
     //Motor_Yaw.Set_Control_Angle(0);
     //Motor_Pitch.Set_Control_Angle(-0.3);
@@ -28,7 +30,7 @@ void Class_Gimbal::Init()
     Motor_Pitch.Set_Control_Omega(45);
 
     // Motor_Yaw.Set_Control_Torque(0.2);
-    // Motor_Pitch.Set_Control_Torque(10);
+    Motor_Pitch.Set_Control_Torque(0.1);
 
     Motor_Yaw.Output();
     //osDelay(pdMS_TO_TICKS(10));
@@ -52,8 +54,10 @@ void Class_Gimbal::Self_Resolution()
 {
     Now_Pitch_Angle = Motor_Pitch.Get_Now_Angle();
     Now_Yaw_Angle   = Motor_Yaw.Get_Now_Angle();
-    // Yaw_Angle_PID.Set_Now(Now_Yaw_Angle);
-    //
+    Yaw_Angle_PID.Set_Now(Now_Yaw_Angle);
+    Yaw_Angle_PID.Calculate_PeriodElapsedCallback();
+    Target_Yaw_Omega = Yaw_Angle_PID.Get_Out();
+
     // // pitch轴角度归化到±PI / 2之间
     // Now_Pitch_Angle = Math_Modulus_Normalization(-Motor_Pitch.Get_Now_Angle(), 2.0f * PI);
 
