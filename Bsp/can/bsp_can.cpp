@@ -1,14 +1,3 @@
-/**
- * @file drv_can.c
- * @author yssickjgd (1345578933@qq.com)
- * @brief 仿照SCUT-Robotlab改写的CAN通信初始化与配置流程
- * @version 0.1
- * @date 2022-08-02
- *
- * @copyright USTC-RoboWalker (c) 2022
- *
- */
-
 /* Includes ------------------------------------------------------------------*/
 
 #include "bsp_can.h"
