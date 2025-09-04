@@ -1,16 +1,15 @@
 /**
- * @file drv_can.h
- * @author yssickjgd (1345578933@qq.com)
- * @brief 仿照SCUT-Robotlab改写的CAN通信初始化与配置流程
+ * @file bsp_can.h
+ * @author noe (noneofever@gmail.com)
+ * @brief 
  * @version 0.1
- * @date 2022-08-02
- *
- * @copyright USTC-RoboWalker (c) 2022
- *
+ * @date 2025-08-02
+ * 
+ * @copyright Copyright (c) 2025
+ * 
  */
-
-#ifndef DRV_CAN_H
-#define DRV_CAN_H
+#ifndef BSP_CAN_H_
+#define BSP_CAN_H_
 #ifdef __cplusplus
 extern "C"{
 #endif
@@ -41,65 +40,65 @@ extern "C"{
  * @brief CAN接收的信息结构体
  *
  */
-struct Struct_CAN_Rx_Buffer
+struct CanRxBuffer
 {
-    FDCAN_RxHeaderTypeDef Header;
-    uint8_t Data[8];
+    FDCAN_RxHeaderTypeDef header;
+    uint8_t data[8];
 };
 
 /**
  * @brief CAN通信接收回调函数数据类型
  *
  */
-typedef void (*CAN_Call_Back)(struct Struct_CAN_Rx_Buffer *);
+typedef void (*CanCallback)(CanRxBuffer *);
 
 /**
  * @brief CAN通信处理结构体
  *
  */
-struct Struct_CAN_Manage_Object
+struct CanManageObject
 {
-    FDCAN_HandleTypeDef *CAN_Handler;
-    struct Struct_CAN_Rx_Buffer Rx_Buffer;
-    CAN_Call_Back Callback_Function;
+    FDCAN_HandleTypeDef *can_handler;
+    CanRxBuffer rx_buffer;
+    CanCallback callback_function;
 };
 
 /* Exported variables ---------------------------------------------------------*/
 
-extern FDCAN_HandleTypeDef hfdcan1;
-extern FDCAN_HandleTypeDef hfdcan2;
-extern FDCAN_HandleTypeDef hfdcan3;
+extern FDCAN_HandleTypeDef g_hfdcan1;
+extern FDCAN_HandleTypeDef g_hfdcan2;
+extern FDCAN_HandleTypeDef g_hfdcan3;
 
-extern struct Struct_CAN_Manage_Object CAN1_Manage_Object;
-extern struct Struct_CAN_Manage_Object CAN2_Manage_Object;
-extern struct Struct_CAN_Manage_Object CAN3_Manage_Object;
+extern CanManageObject g_can1_manage_object;
+extern CanManageObject g_can2_manage_object;
+extern CanManageObject g_can3_manage_object;
 
-extern uint8_t CAN1_0x1ff_Tx_Data[];
-extern uint8_t CAN1_0x200_Tx_Data[];
-extern uint8_t CAN1_0x2ff_Tx_Data[];
-extern uint8_t CAN1_0x3fe_Tx_Data[];
-extern uint8_t CAN1_0x4fe_Tx_Data[];
+extern uint8_t g_can1_0x1ff_tx_data[];
+extern uint8_t g_can1_0x200_tx_data[];
+extern uint8_t g_can1_0x2ff_tx_data[];
+extern uint8_t g_can1_0x3fe_tx_data[];
+extern uint8_t g_can1_0x4fe_tx_data[];
 
-extern uint8_t CAN2_0x1ff_Tx_Data[];
-extern uint8_t CAN2_0x200_Tx_Data[];
-extern uint8_t CAN2_0x2ff_Tx_Data[];
-extern uint8_t CAN2_0x3fe_Tx_Data[];
-extern uint8_t CAN2_0x4fe_Tx_Data[];
+extern uint8_t g_can2_0x1ff_tx_data[];
+extern uint8_t g_can2_0x200_tx_data[];
+extern uint8_t g_can2_0x2ff_tx_data[];
+extern uint8_t g_can2_0x3fe_tx_data[];
+extern uint8_t g_can2_0x4fe_tx_data[];
 
-extern uint8_t CAN_Supercap_Tx_Data[];
+extern uint8_t g_can_supercap_tx_Data[];
 
 /* Exported function declarations ---------------------------------------------*/
 
-void CAN_Init(FDCAN_HandleTypeDef *hcan, CAN_Call_Back Callback_Function);
+void can_init(FDCAN_HandleTypeDef *hcan, CanCallback callback_function);
 
-void CAN_Filter_Mask_Config(FDCAN_HandleTypeDef *hcan, uint8_t Object_Para, uint32_t ID, uint32_t Mask_ID);
+void can_filter_mask_config(FDCAN_HandleTypeDef *hcan, uint8_t object_para, uint32_t id, uint32_t mask_id);
 
-uint8_t CAN_Send_Data(FDCAN_HandleTypeDef *hcan, uint16_t ID, uint8_t *Data, uint16_t Length);
+uint8_t can_send_data(FDCAN_HandleTypeDef *hcan, uint16_t id, uint8_t *data, uint16_t length);
 
-void CAN_PeriodElapsedCallback();
+void can_period_elapsed_callback();
 #ifdef __cplusplus
 }
 #endif
-#endif
+#endif // BSP_CAN_H_
 
 /************************ COPYRIGHT(C) HNUST-DUST **************************/

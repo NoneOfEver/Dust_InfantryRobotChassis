@@ -5,35 +5,35 @@
 #include "Init.h"
 #include "Robot.h"
 
-Class_Robot Robot;
+Robot robot;
 
 /**
  * @brief CAN1回调函数
  *
  * @param CAN_RxMessage CAN1收到的消息
  */
-void Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
+void can1_callback(CanRxBuffer *CAN_RxMessage)
 {
-    switch (CAN_RxMessage->Header.Identifier)
+    switch (CAN_RxMessage->header.Identifier)
     {
         case (0x201):
         {
-            Robot.Chassis.Motor_Chassis_1.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            robot.chassis_.motor_chassis_1_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
         case (0x202):
         {
-            Robot.Chassis.Motor_Chassis_2.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            robot.chassis_.motor_chassis_2_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
         case (0x203):
         {
-            Robot.Chassis.Motor_Chassis_3.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            robot.chassis_.motor_chassis_3_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
         case (0x204):
         {
-            Robot.Chassis.Motor_Chassis_4.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            robot.chassis_.motor_chassis_4_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
         default:
@@ -45,13 +45,13 @@ void Device_CAN1_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
  *
  * @param CAN_RxMessage CAN2收到的消息
  */
-void Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
+void can2_callback(CanRxBuffer *CAN_RxMessage)
 {
-    switch (CAN_RxMessage->Header.Identifier)
+    switch (CAN_RxMessage->header.Identifier)
     {
         case (0x01):
         {
-            Robot.MCU_Comm.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            robot.mcu_comm_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
         default:
@@ -63,18 +63,18 @@ void Device_CAN2_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
  *
  * @param CAN_RxMessage CAN3收到的消息
  */
-void Device_CAN3_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
+void can3_callback(CanRxBuffer *CAN_RxMessage)
 {
-    switch (CAN_RxMessage->Header.Identifier)
+    switch (CAN_RxMessage->header.Identifier)
     {
         case (0x12)://01
         {
-            Robot.Gimbal.Motor_Yaw.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            robot.gimbal_.motor_yaw_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
         case (0x11)://02
         {
-            Robot.Gimbal.Motor_Pitch.CAN_RxCpltCallback(CAN_RxMessage->Data);
+            robot.gimbal_.motor_pitch_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
         default:
@@ -85,12 +85,12 @@ void Device_CAN3_Callback(Struct_CAN_Rx_Buffer *CAN_RxMessage)
 void Init()
 {
     // CAN1 初始化，控制底盘
-    CAN_Init(&hfdcan1,Device_CAN1_Callback);
+    can_init(&hfdcan1,can1_callback);
     // CAN2 初始化，与上板通讯
-    CAN_Init(&hfdcan2,Device_CAN2_Callback);
+    can_init(&hfdcan2,can2_callback);
     // CAN3 初始化，控制云台
-    CAN_Init(&hfdcan3,Device_CAN3_Callback);
+    can_init(&hfdcan3,can3_callback);
 
     HAL_Delay(1000);
-    Robot.Init();
+    robot.Init();
 }

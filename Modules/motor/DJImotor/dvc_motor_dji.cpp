@@ -1,3 +1,13 @@
+/**
+ * @file dvc_motor_dji.cpp
+ * @author noe (noneofever@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-08-04
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 /* Includes ------------------------------------------------------------------*/
 
 #include "dvc_motor_dji.h"
@@ -15,111 +25,114 @@
 /**
  * @brief 估计功率值
  *
- * @param K_0 电机建模系数
- * @param K_1 电机建模系数
- * @param K_2 电机建模系数
+ * @param k_0 电机建模系数
+ * @param k_1 电机建模系数
+ * @param k_2 电机建模系数
  * @param A 电机建模系数
- * @param Current 电流
- * @param Omega 角速度
+ * @param current 电流
+ * @param omega 角速度
  * @return
  */
-float power_calculate(float K_0, float K_1, float K_2, float A, float Current, float Omega)
+float power_calculate(float k_0, float k_1, float k_2, float A, float current, float omega)
 {
-    return (K_0 * Current * Omega + K_1 * Omega * Omega + K_2 * Current * Current + A);
+    return (k_0 * current * omega + k_1 * omega * omega + k_2 * current * current + A);
 }
 
 /**
  * @brief 分配CAN发送缓冲区
  *
  * @param hcan CAN编号
- * @param __CAN_ID CAN ID
- * @param __DJI_Motor_Driver_Version 大疆驱动版本, 当且仅当当前被分配电机为6020, 且是电流驱动新版本时选2023, 否则都是default
+ * @param can_id CAN ID
+ * @param dji_motor_driver_version 大疆驱动版本, 当且仅当当前被分配电机为6020, 且是电流驱动新版本时选2023, 否则都是default
  * @return uint8_t* 缓冲区指针
  */
-uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, Enum_Motor_DJI_ID __CAN_ID, Enum_Motor_DJI_GM6020_Driver_Version __DJI_Motor_Driver_Version = Motor_DJI_GM6020_Driver_Version_DEFAULT)
+uint8_t *allocate_tx_data(
+    FDCAN_HandleTypeDef *hcan, 
+    MotorDjiId can_id, 
+    MotorDjiGm6020DriverVersion dji_motor_driver_version = MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
 {
     uint8_t *tmp_tx_data_ptr;
     if (hcan == &hfdcan1)
     {
-        switch (__CAN_ID)
+        switch (can_id)
         {
-            case (Motor_DJI_ID_0x201):
+            case (MOTOR_DJI_ID_0x201):
             {
-                tmp_tx_data_ptr = &(CAN1_0x200_Tx_Data[0]);
+                tmp_tx_data_ptr = &(g_can1_0x200_tx_data[0]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x202):
+            case (MOTOR_DJI_ID_0x202):
             {
-                tmp_tx_data_ptr = &(CAN1_0x200_Tx_Data[2]);
+                tmp_tx_data_ptr = &(g_can1_0x200_tx_data[2]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x203):
+            case (MOTOR_DJI_ID_0x203):
             {
-                tmp_tx_data_ptr = &(CAN1_0x200_Tx_Data[4]);
+                tmp_tx_data_ptr = &(g_can1_0x200_tx_data[4]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x204):
+            case (MOTOR_DJI_ID_0x204):
             {
-                tmp_tx_data_ptr = &(CAN1_0x200_Tx_Data[6]);
+                tmp_tx_data_ptr = &(g_can1_0x200_tx_data[6]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x205):
+            case (MOTOR_DJI_ID_0x205):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN1_0x1ff_Tx_Data[0]);
+                    tmp_tx_data_ptr = &(g_can1_0x1ff_tx_data[0]);
                 }
                 break;
             }
-            case (Motor_DJI_ID_0x206):
+            case (MOTOR_DJI_ID_0x206):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN1_0x1ff_Tx_Data[2]);
+                    tmp_tx_data_ptr = &(g_can1_0x1ff_tx_data[2]);
                 }
                 break;
             }
-            case (Motor_DJI_ID_0x207):
+            case (MOTOR_DJI_ID_0x207):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN1_0x1ff_Tx_Data[4]);
+                    tmp_tx_data_ptr = &(g_can1_0x1ff_tx_data[4]);
                 }
                 break;
             }
-            case (Motor_DJI_ID_0x208):
+            case (MOTOR_DJI_ID_0x208):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN1_0x1ff_Tx_Data[6]);
+                    tmp_tx_data_ptr = &(g_can1_0x1ff_tx_data[6]);
                 }
                 break;
             }
-            case (Motor_DJI_ID_0x209):
+            case (MOTOR_DJI_ID_0x209):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN1_0x2ff_Tx_Data[0]);
+                    tmp_tx_data_ptr = &(g_can1_0x2ff_tx_data[0]);
                 }
                 break;
             }
-            case (Motor_DJI_ID_0x20A):
+            case (MOTOR_DJI_ID_0x20A):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN1_0x2ff_Tx_Data[2]);
+                    tmp_tx_data_ptr = &(g_can1_0x2ff_tx_data[2]);
                 }
                 break;
             }
-            case (Motor_DJI_ID_0x20B):
+            case (MOTOR_DJI_ID_0x20B):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN1_0x2ff_Tx_Data[4]);
+                    tmp_tx_data_ptr = &(g_can1_0x2ff_tx_data[4]);
                 }
                 break;
             }
@@ -127,91 +140,91 @@ uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, Enum_Motor_DJI_ID __CAN_ID,
     }
     else if (hcan == &hfdcan2)
     {
-        switch (__CAN_ID)
+        switch (can_id)
         {
-            case (Motor_DJI_ID_0x201):
+            case (MOTOR_DJI_ID_0x201):
             {
-                tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[0]);
+                tmp_tx_data_ptr = &(g_can2_0x200_tx_data[0]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x202):
+            case (MOTOR_DJI_ID_0x202):
             {
-                tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[2]);
+                tmp_tx_data_ptr = &(g_can2_0x200_tx_data[2]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x203):
+            case (MOTOR_DJI_ID_0x203):
             {
-                tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[4]);
+                tmp_tx_data_ptr = &(g_can2_0x200_tx_data[4]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x204):
+            case (MOTOR_DJI_ID_0x204):
             {
-                tmp_tx_data_ptr = &(CAN2_0x200_Tx_Data[6]);
+                tmp_tx_data_ptr = &(g_can2_0x200_tx_data[6]);
 
                 break;
             }
-            case (Motor_DJI_ID_0x205):
+            case (MOTOR_DJI_ID_0x205):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[0]);
+                    tmp_tx_data_ptr = &(g_can2_0x1ff_tx_data[0]);
                 }
 
                 break;
             }
-            case (Motor_DJI_ID_0x206):
+            case (MOTOR_DJI_ID_0x206):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[2]);
+                    tmp_tx_data_ptr = &(g_can2_0x1ff_tx_data[2]);
                 }
 
                 break;
             }
-            case (Motor_DJI_ID_0x207):
+            case (MOTOR_DJI_ID_0x207):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[4]);
+                    tmp_tx_data_ptr = &(g_can2_0x1ff_tx_data[4]);
                 }
 
                 break;
             }
-            case (Motor_DJI_ID_0x208):
+            case (MOTOR_DJI_ID_0x208):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN2_0x1ff_Tx_Data[6]);
+                    tmp_tx_data_ptr = &(g_can2_0x1ff_tx_data[6]);
                 }
 
                 break;
             }
-            case (Motor_DJI_ID_0x209):
+            case (MOTOR_DJI_ID_0x209):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[0]);
+                    tmp_tx_data_ptr = &(g_can2_0x2ff_tx_data[0]);
                 }
 
                 break;
             }
-            case (Motor_DJI_ID_0x20A):
+            case (MOTOR_DJI_ID_0x20A):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[2]);
+                    tmp_tx_data_ptr = &(g_can2_0x2ff_tx_data[2]);
                 }
 
                 break;
             }
-            case (Motor_DJI_ID_0x20B):
+            case (MOTOR_DJI_ID_0x20B):
             {
-                if (__DJI_Motor_Driver_Version == Motor_DJI_GM6020_Driver_Version_DEFAULT)
+                if (dji_motor_driver_version == MOTOR_DJI_GM6020_DRIVER_VERSION_DEFAULT)
                 {
-                    tmp_tx_data_ptr = &(CAN2_0x2ff_Tx_Data[4]);
+                    tmp_tx_data_ptr = &(g_can2_0x2ff_tx_data[4]);
                 }
 
                 break;
@@ -225,141 +238,146 @@ uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, Enum_Motor_DJI_ID __CAN_ID,
  * @brief 电机初始化
  *
  * @param hcan CAN编号
- * @param __CAN_Rx_ID CAN ID
- * @param __Motor_DJI_Control_Method 电机控制方式, 默认角度
- * @param __Gearbox_Rate 减速箱减速比, 默认为原装减速箱, 如拆去减速箱则该值设为1
- * @param __Current_Max 最大电流
+ * @param can_rx_id CAN ID
+ * @param MOTOR_DJI_CONTROL_METHOD 电机控制方式, 默认角度
+ * @param gearbox_rata 减速箱减速比, 默认为原装减速箱, 如拆去减速箱则该值设为1
+ * @param current_max 最大电流
  */
-void Class_Motor_DJI_C610::Init(FDCAN_HandleTypeDef *hcan, Enum_Motor_DJI_ID __CAN_Rx_ID, Enum_Motor_DJI_Control_Method __Motor_DJI_Control_Method, float __Gearbox_Rate, float __Current_Max)
+void MotorDjiC610::Init(
+    FDCAN_HandleTypeDef *hcan, 
+    MotorDjiId can_rx_id, 
+    MotorDjiControlMethod motor_dji_control_method, 
+    float gearbox_rata, 
+    float current_max)
 {
     if (hcan->Instance == FDCAN1)
     {
-        CAN_Manage_Object = &CAN1_Manage_Object;
+        can_manage_object_ = &g_can1_manage_object;
     }
     else if (hcan->Instance == FDCAN2)
     {
-        CAN_Manage_Object = &CAN2_Manage_Object;
+        can_manage_object_ = &g_can2_manage_object;
     }
-    CAN_Rx_ID = __CAN_Rx_ID;
-    Motor_DJI_Control_Method = __Motor_DJI_Control_Method;
-    Gearbox_Rate = __Gearbox_Rate;
-    Current_Max = __Current_Max;
-    Tx_Data = allocate_tx_data(hcan, __CAN_Rx_ID);
+    can_rx_id_ = can_rx_id;
+    motor_dji_control_method_ = motor_dji_control_method;
+    gearbox_rate_ = gearbox_rata;
+    current_max_ = current_max;
+    tx_data_ = allocate_tx_data(hcan, can_rx_id);
 }
 
 /**
  * @brief CAN通信接收回调函数
  *
- * @param Rx_Data 接收的数据
+ * @param rx_data_ 接收的数据
  */
-void Class_Motor_DJI_C610::CAN_RxCpltCallback(uint8_t *Rx_Data)
+void MotorDjiC610::CanRxCpltCallback(uint8_t *rx_data)
 {
     // 滑动窗口, 判断电机是否在线
-    Flag += 1;
+    flag_ += 1;
 
-    Data_Process();
+    DataProcess();
 }
 
 /**
  * @brief TIM定时器中断计算回调函数, 计算周期取决于电机反馈周期
  *
  */
-void Class_Motor_DJI_C610::TIM_Calculate_PeriodElapsedCallback()
+void MotorDjiC610::CalculatePeriodElapsedCallback()
 {
-    PID_Calculate();
+    PidCalculate();
 
-    float tmp_value = Target_Current + Feedforward_Current;
-    Math_Constrain(&tmp_value, -Current_Max, Current_Max);
-    Out = tmp_value * Current_To_Out;
+    float tmp_value = target_current_ + feedforward_current_;
+    math_constrain(&tmp_value, -current_max_, current_max_);
+    out_ = tmp_value * current_to_out_;
 
     Output();
 
-    Feedforward_Current = 0.0f;
-    Feedforward_Omega = 0.0f;
+    feedforward_current_ = 0.0f;
+    feedforward_omega_ = 0.0f;
 }
 
 /**
  * @brief 数据处理过程
  *
  */
-void Class_Motor_DJI_C610::Data_Process()
+void MotorDjiC610::DataProcess()
 {
     // 数据处理过程
     int16_t delta_encoder;
     uint16_t tmp_encoder;
     int16_t tmp_omega, tmp_current;
-    Struct_Motor_DJI_CAN_Rx_Data *tmp_buffer = (Struct_Motor_DJI_CAN_Rx_Data *) CAN_Manage_Object->Rx_Buffer.Data;
+    MotorDjiCanRxData *tmp_buffer = (MotorDjiCanRxData *) can_manage_object_->rx_buffer.data;
 
     // 处理大小端
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Encoder_Reverse, (void *) &tmp_encoder);
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Omega_Reverse, (void *) &tmp_omega);
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Current_Reverse, (void *) &tmp_current);
+    math_endian_reverse_16((void *) &tmp_buffer->encoder_reverse, (void *) &tmp_encoder);
+    math_endian_reverse_16((void *) &tmp_buffer->omega_reverse, (void *) &tmp_omega);
+    math_endian_reverse_16((void *) &tmp_buffer->current_reverse, (void *) &tmp_current);
 
     // 计算圈数与总编码器值
-    delta_encoder = tmp_encoder - Rx_Data.Pre_Encoder;
-    if (delta_encoder < -Encoder_Num_Per_Round / 2)
+    delta_encoder = tmp_encoder - rx_data_.pre_encoder;
+    if (delta_encoder < -encoder_num_per_round_ / 2)
     {
         // 正方向转过了一圈
-        Rx_Data.Total_Round++;
+        rx_data_.total_round++;
     }
-    else if (delta_encoder > Encoder_Num_Per_Round / 2)
+    else if (delta_encoder > encoder_num_per_round_ / 2)
     {
         // 反方向转过了一圈
-        Rx_Data.Total_Round--;
+        rx_data_.total_round--;
     }
-    Rx_Data.Total_Encoder = Rx_Data.Total_Round * Encoder_Num_Per_Round + tmp_encoder;
+    rx_data_.total_encoder = rx_data_.total_round * encoder_num_per_round_ + tmp_encoder;
 
     // 计算电机本身信息
-    Rx_Data.Now_Angle = (float) Rx_Data.Total_Encoder / (float) Encoder_Num_Per_Round * 2.0f * PI / Gearbox_Rate;
-    Rx_Data.Now_Omega = (float) tmp_omega * RPM_TO_RADPS / Gearbox_Rate;
-    Rx_Data.Now_Current = tmp_current / Current_To_Out;
-    Rx_Data.Now_Temperature = tmp_buffer->Temperature + CELSIUS_TO_KELVIN;
+    rx_data_.now_angle = (float) rx_data_.total_encoder / (float) encoder_num_per_round_ * 2.0f * PI / gearbox_rate_;
+    rx_data_.now_omega = (float) tmp_omega * RPM_TO_RADPS / gearbox_rate_;
+    rx_data_.now_current = tmp_current / current_to_out_;
+    rx_data_.now_temperature = tmp_buffer->temperature + CELSIUS_TO_KELVIN;
 
     // 存储预备信息
-    Rx_Data.Pre_Encoder = tmp_encoder;
+    rx_data_.pre_encoder = tmp_encoder;
 }
 
 /**
  * @brief 计算PID
  *
  */
-void Class_Motor_DJI_C610::PID_Calculate()
+void MotorDjiC610::PidCalculate()
 {
-    switch (Motor_DJI_Control_Method)
+    switch (motor_dji_control_method_)
     {
-    case (Motor_DJI_Control_Method_CURRENT):
+    case (MOTOR_DJI_CONTROL_METHOD_CURRENT):
     {
         break;
     }
-    case (Motor_DJI_Control_Method_OMEGA):
+    case (MOTOR_DJI_CONTROL_METHOD_OMEGA):
     {
-        PID_Omega.Set_Target(Target_Omega + Feedforward_Omega);
-        PID_Omega.Set_Now(Rx_Data.Now_Omega);
-        PID_Omega.Calculate_PeriodElapsedCallback();
+        pid_omega_.SetTarget(target_omega_ + feedforward_omega_);
+        pid_omega_.SetNow(rx_data_.now_omega);
+        pid_omega_.CalculatePeriodElapsedCallback();
 
-        Target_Current = PID_Omega.Get_Out();
+        target_current_ = pid_omega_.GetOut();
 
         break;
     }
-    case (Motor_DJI_Control_Method_ANGLE):
+    case (MOTOR_DJI_CONTROL_METHOD_ANGLE):
     {
-        PID_Angle.Set_Target(Target_Angle);
-        PID_Angle.Set_Now(Rx_Data.Now_Angle);
-        PID_Angle.Calculate_PeriodElapsedCallback();
+        pid_angle_.SetTarget(target_angle_);
+        pid_angle_.SetNow(rx_data_.now_angle);
+        pid_angle_.CalculatePeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        target_omega_ = pid_angle_.GetOut();
 
-        PID_Omega.Set_Target(Target_Omega + Feedforward_Omega);
-        PID_Omega.Set_Now(Rx_Data.Now_Omega);
-        PID_Omega.Calculate_PeriodElapsedCallback();
+        pid_omega_.SetTarget(target_omega_ + feedforward_omega_);
+        pid_omega_.SetNow(rx_data_.now_omega);
+        pid_omega_.CalculatePeriodElapsedCallback();
 
-        Target_Current = PID_Omega.Get_Out();
+        target_current_ = pid_omega_.GetOut();
 
         break;
     }
     default:
     {
-        Target_Current = 0.0f;
+        target_current_ = 0.0f;
 
         break;
     }
@@ -370,98 +388,110 @@ void Class_Motor_DJI_C610::PID_Calculate()
  * @brief 电机数据输出到CAN总线发送缓冲区
  *
  */
-void Class_Motor_DJI_C610::Output()
+void MotorDjiC610::Output()
 {
-    Tx_Data[0] = (int16_t) Out >> 8;
-    Tx_Data[1] = (int16_t) Out;
+    tx_data_[0] = (int16_t) out_ >> 8;
+    tx_data_[1] = (int16_t) out_;
 }
 
 /**
  * @brief 电机初始化
  *
  * @param hcan CAN编号
- * @param __CAN_Rx_ID CAN ID
- * @param __Motor_DJI_Control_Method 电机控制方式, 默认速度
- * @param __Gearbox_Rate 减速箱减速比, 默认为原装减速箱, 如拆去减速箱则该值设为1
- * @param __Power_Limit_Status 是否开启功率控制
- * @param __Current_Max 最大电流
+ * @param can_rx_id CAN ID
+ * @param motor_dji_control_method 电机控制方式, 默认速度
+ * @param gearbox_rata 减速箱减速比, 默认为原装减速箱, 如拆去减速箱则该值设为1
+ * @param power_limit_status 是否开启功率控制
+ * @param current_max 最大电流
  */
-void Class_Motor_DJI_C620::Init(FDCAN_HandleTypeDef *hcan, Enum_Motor_DJI_ID __CAN_Rx_ID, Enum_Motor_DJI_Control_Method __Motor_DJI_Control_Method, float __Gearbox_Rate, Enum_Motor_DJI_Power_Limit_Status __Power_Limit_Status, float __Current_Max)
+void MotorDjiC620::Init(
+    FDCAN_HandleTypeDef *hcan, 
+    MotorDjiId can_rx_id, 
+    MotorDjiControlMethod motor_dji_control_method, 
+    float gearbox_rata, 
+    MotorDjiPowerLimitStatus power_limit_status, 
+    float current_max)
 {
     if (hcan->Instance == FDCAN1)
     {
-        CAN_Manage_Object = &CAN1_Manage_Object;
+        can_manage_object_ = &g_can1_manage_object;
     }
     else if (hcan->Instance == FDCAN2)
     {
-        CAN_Manage_Object = &CAN2_Manage_Object;
+        can_manage_object_ = &g_can2_manage_object;
     }
-    CAN_Rx_ID = __CAN_Rx_ID;
-    Motor_DJI_Control_Method = __Motor_DJI_Control_Method;
-    Power_Limit_Status = __Power_Limit_Status;
-    Gearbox_Rate = __Gearbox_Rate;
-    Current_Max = __Current_Max;
-    Tx_Data = allocate_tx_data(hcan, __CAN_Rx_ID);
+    can_rx_id_ = can_rx_id;
+    motor_dji_control_method_ = motor_dji_control_method;
+    power_limit_status_ = power_limit_status;
+    gearbox_rate_ = gearbox_rata;
+    current_max_ = current_max;
+    tx_data_ = allocate_tx_data(hcan, can_rx_id);
 }
 
 /**
  * @brief CAN通信接收回调函数
  *
- * @param Rx_Data 接收的数据
+ * @param rx_data_ 接收的数据
  */
-void Class_Motor_DJI_C620::CAN_RxCpltCallback(uint8_t *Rx_Data)
+void MotorDjiC620::CanRxCpltCallback(uint8_t *rx_data_)
 {
     // 滑动窗口, 判断电机是否在线
-    Flag += 1;
+    flag_ += 1;
 
-    Data_Process();
+    DataProcess();
 }
 
 /**
  * @brief TIM定时器中断定期检测电机是否存活
  *
  */
-void Class_Motor_DJI_C620::Alive_PeriodElapsedCallback()
+void MotorDjiC620::AlivePeriodElapsedCallback()
 {
     // 判断该时间段内是否接收过电机数据
-    if (Flag == Pre_Flag)
+    if (flag_ == pre_flag_)
     {
         // 电机断开连接
-        Motor_DJI_Status = Motor_DJI_Status_DISABLE;
-        Motor_DJI_Control_Method = Motor_DJI_Control_Method_CURRENT;
-        PID_Angle.Set_Integral_Error(0.0f);
-        PID_Omega.Set_Integral_Error(0.0f);
-        Target_Current = 0.0f;
+        motor_dji_status_ = MOTOR_DJI_STATUS_DISABLE;
+        motor_dji_control_method_ = MOTOR_DJI_CONTROL_METHOD_CURRENT;
+        pid_angle_.SetIntegralError(0.0f);
+        pid_omega_.SetIntegralError(0.0f);
+        target_current_ = 0.0f;
     }
     else
     {
         // 电机保持连接
-        Motor_DJI_Status = Motor_DJI_Status_ENABLE;
+        motor_dji_status_ = MOTOR_DJI_STATUS_ENABLE;
     }
-    Pre_Flag = Flag;
+    pre_flag_ = flag_;
 }
 
 /**
  * @brief 中断计算回调函数, 计算周期取决于电机反馈周期
  *
  */
-void Class_Motor_DJI_C620::Calculate_PeriodElapsedCallback()
+void MotorDjiC620::CalculatePeriodElapsedCallback()
 {
-    PID_Calculate();
+    PidCalculate();
 
-    float tmp_value = Target_Current + Feedforward_Current;
-    Math_Constrain(&tmp_value, -Current_Max, Current_Max);
-    Out = tmp_value * Current_To_Out;
+    float tmp_value = target_current_ + feedforward_current_;
+    math_constrain(&tmp_value, -current_max_, current_max_);
+    out_ = tmp_value * current_to_out_;
 
     // 计算功率估计值
-    Power_Estimate = power_calculate(Power_K_0, Power_K_1, Power_K_2, Power_A, Target_Current, Rx_Data.Now_Omega / Gearbox_Rate);
+    power_estimate_ = power_calculate(
+                        power_k_0_, 
+                        power_k_1_, 
+                        power_k_2_, 
+                        power_A_, 
+                        target_current_, 
+                        rx_data_.now_omega / gearbox_rate_);
 
     Output();
 
-    if (Power_Limit_Status == Motor_DJI_Power_Limit_Status_DISABLE)
+    if (power_limit_status_ == MOTOR_DJI_POWER_LIMIT_STATUS_DISABLE)
     {
-        Feedforward_Current = 0.0f;
-        Feedforward_Omega = 0.0f;
+        feedforward_current_ = 0.0f;
+        feedforward_omega_ = 0.0f;
     }
 }
 
@@ -469,105 +499,112 @@ void Class_Motor_DJI_C620::Calculate_PeriodElapsedCallback()
  * @brief TIM定时器中断功率控制善后计算回调函数, 计算周期取决于电机反馈周期
  *
  */
-void Class_Motor_DJI_C620::Power_Limit_After_Calculate_PeriodElapsedCallback()
+void MotorDjiC620::PowerLimitAfterCalculatePeriodElapsedCallback()
 {
-    if (Power_Limit_Status == Motor_DJI_Power_Limit_Status_ENABLE)
+    if (power_limit_status_ == MOTOR_DJI_POWER_LIMIT_STATUS_ENABLE)
     {
-        Power_Limit_Control();
+        PowerLimitControl();
     }
 
-    Math_Constrain(&Target_Current, -Current_Max, Current_Max);
-    Out = Target_Current * Current_To_Out;
+    math_constrain(&target_current_, -current_max_, current_max_);
+    out_ = target_current_ * current_to_out_;
 
     Output();
 
-    Feedforward_Current = 0.0f;
-    Feedforward_Omega = 0.0f;
+    feedforward_current_ = 0.0f;
+    feedforward_omega_ = 0.0f;
 }
 
 /**
  * @brief 数据处理过程
  *
  */
-void Class_Motor_DJI_C620::Data_Process()
+void MotorDjiC620::DataProcess()
 {
     // 数据处理过程
     int16_t delta_encoder;
     uint16_t tmp_encoder;
     int16_t tmp_omega, tmp_current;
-    Struct_Motor_DJI_CAN_Rx_Data *tmp_buffer = (Struct_Motor_DJI_CAN_Rx_Data *) CAN_Manage_Object->Rx_Buffer.Data;
+    MotorDjiCanRxData *tmp_buffer = (MotorDjiCanRxData *) can_manage_object_->rx_buffer.data;
 
     // 处理大小端
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Encoder_Reverse, (void *) &tmp_encoder);
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Omega_Reverse, (void *) &tmp_omega);
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Current_Reverse, (void *) &tmp_current);
+    math_endian_reverse_16((void *) &tmp_buffer->encoder_reverse, (void *) &tmp_encoder);
+    math_endian_reverse_16((void *) &tmp_buffer->omega_reverse, (void *) &tmp_omega);
+    math_endian_reverse_16((void *) &tmp_buffer->current_reverse, (void *) &tmp_current);
 
     // 计算圈数与总编码器值
-    delta_encoder = tmp_encoder - Rx_Data.Pre_Encoder;
-    if (delta_encoder < -Encoder_Num_Per_Round / 2)
+    delta_encoder = tmp_encoder - rx_data_.pre_encoder;
+    if (delta_encoder < -encoder_num_per_round_ / 2)
     {
         // 正方向转过了一圈
-        Rx_Data.Total_Round++;
+        rx_data_.total_round++;
     }
-    else if (delta_encoder > Encoder_Num_Per_Round / 2)
+    else if (delta_encoder > encoder_num_per_round_ / 2)
     {
         // 反方向转过了一圈
-        Rx_Data.Total_Round--;
+        rx_data_.total_round--;
     }
-    Rx_Data.Total_Encoder = Rx_Data.Total_Round * Encoder_Num_Per_Round + tmp_encoder;
+    rx_data_.total_encoder = rx_data_.total_round * encoder_num_per_round_ + tmp_encoder;
 
     // 计算电机本身信息
-    Rx_Data.Now_Angle = (float) Rx_Data.Total_Encoder / (float) Encoder_Num_Per_Round * 2.0f * PI / Gearbox_Rate;
-    Rx_Data.Now_Omega = (float) tmp_omega * RPM_TO_RADPS / Gearbox_Rate;
-    Rx_Data.Now_Current = tmp_current / Current_To_Out;
-    Rx_Data.Now_Temperature = tmp_buffer->Temperature + CELSIUS_TO_KELVIN;
-    Rx_Data.Now_Power = power_calculate(Power_K_0, Power_K_1, Power_K_2, Power_A, Rx_Data.Now_Current, Rx_Data.Now_Omega * Gearbox_Rate);
+    rx_data_.now_angle = 
+        (float) rx_data_.total_encoder / (float) encoder_num_per_round_ * 2.0f * PI / gearbox_rate_;
+    rx_data_.now_omega = (float) tmp_omega * RPM_TO_RADPS / gearbox_rate_;
+    rx_data_.now_current = tmp_current / current_to_out_;
+    rx_data_.now_temperature = tmp_buffer->temperature + CELSIUS_TO_KELVIN;
+    rx_data_.now_power = power_calculate(
+                            power_k_0_, 
+                            power_k_1_, 
+                            power_k_2_, 
+                            power_A_, 
+                            rx_data_.now_current, 
+                            rx_data_.now_omega * gearbox_rate_);
 
     // 存储预备信息
-    Rx_Data.Pre_Encoder = tmp_encoder;
+    rx_data_.pre_encoder = tmp_encoder;
 }
 
 /**
  * @brief 计算PID
  *
  */
-void Class_Motor_DJI_C620::PID_Calculate()
+void MotorDjiC620::PidCalculate()
 {
-    switch (Motor_DJI_Control_Method)
+    switch (motor_dji_control_method_)
     {
-    case (Motor_DJI_Control_Method_CURRENT):
+    case (MOTOR_DJI_CONTROL_METHOD_CURRENT):
     {
         break;
     }
-    case (Motor_DJI_Control_Method_OMEGA):
+    case (MOTOR_DJI_CONTROL_METHOD_OMEGA):
     {
-        PID_Omega.Set_Target(Target_Omega + Feedforward_Omega);
-        PID_Omega.Set_Now(Rx_Data.Now_Omega);
-        PID_Omega.Calculate_PeriodElapsedCallback();
+        pid_omega_.SetTarget(target_omega_ + feedforward_omega_);
+        pid_omega_.SetNow(rx_data_.now_omega);
+        pid_omega_.CalculatePeriodElapsedCallback();
 
-        Target_Current = PID_Omega.Get_Out();
+        target_current_ = pid_omega_.GetOut();
 
         break;
     }
-    case (Motor_DJI_Control_Method_ANGLE):
+    case (MOTOR_DJI_CONTROL_METHOD_ANGLE):
     {
-        PID_Angle.Set_Target(Target_Angle);
-        PID_Angle.Set_Now(Rx_Data.Now_Angle);
-        PID_Angle.Calculate_PeriodElapsedCallback();
+        pid_angle_.SetTarget(target_angle_);
+        pid_angle_.SetNow(rx_data_.now_angle);
+        pid_angle_.CalculatePeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        target_omega_ = pid_angle_.GetOut();
 
-        PID_Omega.Set_Target(Target_Omega + Feedforward_Omega);
-        PID_Omega.Set_Now(Rx_Data.Now_Omega);
-        PID_Omega.Calculate_PeriodElapsedCallback();
+        pid_omega_.SetTarget(target_omega_ + feedforward_omega_);
+        pid_omega_.SetNow(rx_data_.now_omega);
+        pid_omega_.CalculatePeriodElapsedCallback();
 
-        Target_Current = PID_Omega.Get_Out();
+        target_current_ = pid_omega_.GetOut();
 
         break;
     }
     default:
     {
-        Target_Current = 0.0f;
+        target_current_ = 0.0f;
 
         break;
     }
@@ -578,12 +615,12 @@ void Class_Motor_DJI_C620::PID_Calculate()
  * @brief 功率控制算法, 修改电流目标值
  *
  */
-void Class_Motor_DJI_C620::Power_Limit_Control()
+void MotorDjiC620::PowerLimitControl()
 {
     // 若功率为正则考虑功率控制限制
-    if (Power_Estimate > 0.0f)
+    if (power_estimate_ > 0.0f)
     {
-        if (Power_Factor >= 1.0f)
+        if (power_factor_ >= 1.0f)
         {
             // 无需功率控制
         }
@@ -592,15 +629,17 @@ void Class_Motor_DJI_C620::Power_Limit_Control()
             // 需要功率控制
 
             // 根据功率估计公式解一元二次方程求电流值
-            float a = Power_K_2;
-            float b = Power_K_0 * Rx_Data.Now_Omega;
-            float c = Power_A + Power_K_1 * Rx_Data.Now_Omega * Rx_Data.Now_Omega - Power_Factor * Power_Estimate;
+            float a = power_k_2_;
+            float b = power_k_0_ * rx_data_.now_omega;
+            float c = power_A_ 
+                    + power_k_1_ * rx_data_.now_omega * rx_data_.now_omega 
+                    - power_factor_ * power_estimate_;
             float delta, h;
             delta = b * b - 4 * a * c;
             if (delta < 0.0f)
             {
                 // 无解
-                Target_Current = 0.0f;
+                target_current_ = 0.0f;
             }
             else
             {
@@ -612,24 +651,24 @@ void Class_Motor_DJI_C620::Power_Limit_Control()
                 // 两个潜在的可行电流值, 取绝对值最小的那个
                 if ((result_1 > 0.0f && result_2 < 0.0f) || (result_1 < 0.0f && result_2 > 0.0f))
                 {
-                    if ((Target_Current > 0.0f && result_1 > 0.0f) || (Target_Current < 0.0f && result_1 < 0.0f))
+                    if ((target_current_ > 0.0f && result_1 > 0.0f) || (target_current_ < 0.0f && result_1 < 0.0f))
                     {
-                        Target_Current = result_1;
+                        target_current_ = result_1;
                     }
                     else
                     {
-                        Target_Current = result_2;
+                        target_current_ = result_2;
                     }
                 }
                 else
                 {
-                    if (Math_Abs(result_1) < Math_Abs(result_2))
+                    if (math_abs(result_1) < math_abs(result_2))
                     {
-                        Target_Current = result_1;
+                        target_current_ = result_1;
                     }
                     else
                     {
-                        Target_Current = result_2;
+                        target_current_ = result_2;
                     }
                 }
             }
@@ -641,10 +680,10 @@ void Class_Motor_DJI_C620::Power_Limit_Control()
  * @brief 电机数据输出到CAN总线发送缓冲区
  *
  */
-void Class_Motor_DJI_C620::Output()
+void MotorDjiC620::Output()
 {
-    Tx_Data[0] = (int16_t) Out >> 8;
-    Tx_Data[1] = (int16_t) Out;
+    tx_data_[0] = (int16_t) out_ >> 8;
+    tx_data_[1] = (int16_t) out_;
 }
 
 /************************ COPYRIGHT(C) HNUST-DUST **************************/

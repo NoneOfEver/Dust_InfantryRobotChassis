@@ -65,7 +65,7 @@
   */
 
 /* USER CODE BEGIN EXPORTED_TYPES */
-typedef void (*USBCallback)(uint16_t); // USB事件回调函数类型
+typedef void (*UsbCallback)(uint16_t); // USB事件回调函数类型
 
 /* USER CODE END EXPORTED_TYPES */
 
@@ -110,7 +110,7 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_HS;
 uint8_t CDC_Transmit_HS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
-uint8_t* CDCInitRxbufferNcallback(USBCallback transmit_cbk,USBCallback recv_cbk);
+uint8_t* CDCInitRxbufferNcallback(UsbCallback transmit_cbk,UsbCallback recv_cbk);
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**

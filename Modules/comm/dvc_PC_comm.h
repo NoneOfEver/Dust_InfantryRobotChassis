@@ -1,9 +1,9 @@
-#ifndef DVC_PC_COMM_H
-#define DVC_PC_COMM_H
+#ifndef MODULES_COMM_DVC_PC_COMM_H
+#define MODULES_COMM_DVC_PC_COMM_H
 
 #include "bsp_usb.h"
 
-class Class_PC_comm
+class PcComm
 {
 public:
 
@@ -15,4 +15,4 @@ protected:
     static void TaskEntry(void *param);
 };
 
-#endif //DVC_PC_COMM_H
+#endif //MODULES_COMM_DVC_PC_COMM_H

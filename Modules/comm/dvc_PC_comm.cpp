@@ -3,12 +3,10 @@
 //
 
 #include "dvc_PC_comm.h"
+#include "bsp_usb.h"
 
-uint8_t* USB_RxBuf;
-uint8_t usb_tx_cmplt_flag = 0;
-static float Kp,Kd,Angle,Omega,Torque;
-const char* param_list[] = {"Omega","Angle","Torque" "Kp", "Kd"};
-#define PARAM_COUNT (sizeof(param_list) / sizeof(param_list[0]))
+uint8_t* g_usb_rx_buffer;
+uint8_t g_usb_tx_cmplt_flag = 0;
 
 /**
  * @bief USB接收完成回调函数
@@ -17,7 +15,7 @@ const char* param_list[] = {"Omega","Angle","Torque" "Kp", "Kd"};
  */
 void test_usb_rx_callback(uint16_t len)
 {
-    USBTransmit(USB_RxBuf,len);
+    usb_transmit(g_usb_rx_buffer,len);
 }
 
 /**
@@ -30,62 +28,12 @@ void test_usb_tx_callback(uint16_t len)
 
 }
 
-// void parse_parameter(uint8_t* input)
-// {
-//     // 把 uint8_t* 转成 C 字符串
-//     char* str = (char*)input;
-//
-//     // 尝试匹配 "Omega:"
-//     if (strncmp(str, "Omega:", 6) == 0)
-//     {
-//         Omega = atof(str + 6);
-//         Motor_Yaw.Set_Control_Omega(Omega);
-//         Motor_Pitch.Set_Control_Omega(Omega);
-//         return;
-//     }
-//
-//     // 尝试匹配 "Angle:"
-//     if (strncmp(str, "Angle:", 6) == 0)
-//     {
-//         Angle = atof(str + 6);
-//         Motor_Yaw.Set_Control_Angle(Angle);
-//         Motor_Pitch.Set_Control_Angle(Angle);
-//         return;
-//     }
-//
-//     // 尝试匹配 "Torque:"
-//     if (strncmp(str, "Torque:", 7) == 0)
-//     {
-//         Torque = atof(str + 7);
-//         Motor_Yaw.Set_Control_Torque(Torque);
-//         Motor_Pitch.Set_Control_Torque(Torque);
-//         return;
-//     }
-//
-//     // 尝试匹配 "Kp:"
-//     if (strncmp(str, "Kp:", 3) == 0)
-//     {
-//         Kp = atof(str + 3);
-//         Motor_Yaw.Set_K_P(Kp);
-//         Motor_Pitch.Set_K_P(Kp);
-//         return;
-//     }
-//
-//     // 尝试匹配 "Kd:"
-//     if (strncmp(str, "Kd:", 3) == 0)
-//     {
-//         Kd = atof(str + 3);
-//         Motor_Yaw.Set_K_D(Kd);
-//         Motor_Pitch.Set_K_D(Kd);
-//         return;
-//     }
-// }
-void Class_PC_comm::Init()
+void PcComm::Init()
 {
     // USB初始化
-    USB_Init_Config_s USB_Init_Config = {
+    UsbInitConfig usb_init_config = {
         .tx_cbk = test_usb_tx_callback,
         .rx_cbk = test_usb_rx_callback,
     };
-    USB_RxBuf = USBInit(USB_Init_Config);
+    g_usb_rx_buffer = usb_init(usb_init_config);
 }

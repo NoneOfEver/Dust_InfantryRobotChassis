@@ -1,9 +1,19 @@
-#ifndef GIMBAL_H
-#define GIMBAL_H
+/**
+ * @file app_gimbal.h
+ * @author noe (noneofever@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-08-04
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+#ifndef APP_GIMBAL_H
+#define APP_GIMBAL_H
 
 #include "FreeRTOS.h"
 // module
-#include "dvc_motor_dm.hpp"
+#include "dvc_motor_dm.h"
 // bsp
 #include "bsp_log.h"
 #include "bsp_usb.h"
@@ -15,88 +25,88 @@
  * @brief 云台控制类型
  *
  */
-enum Enum_Gimbal_Control_Type
+enum GimbalControlType
 {
-    Gimbal_Control_Type_Manual = 0,
-    Gimbal_Control_Type_AutoAim,
+    GIMBAL_CONTROL_TYPE_MANUAL = 0,
+    GIMBAL_CONTROL_TYPE_AUTOAIM,
 };
 
-class Class_Gimbal
+class Gimbal
 {
 public:
     // 2个DM6220，作为云台Yaw和Pitch轴控制电机
-    Class_Motor_DM_Normal Motor_Yaw;
-    Class_Motor_DM_Normal Motor_Pitch;
+    MotorDmNormal motor_yaw_;
+    MotorDmNormal motor_pitch_;
 
-    Class_PID Yaw_Angle_PID;
+    Pid yaw_angle_pid_;
 
 
     void Init();
 
     void Task();
 
-    inline float Get_Now_Yaw_Angle();
+    inline float GetNowYawAngle();
 
-    inline float Get_Now_Pitch_Angle();
+    inline float GetNowPitchAngle();
 
-    inline float Get_Now_Yaw_Omega();
+    inline float GetNowYawOmega();
 
-    inline float Get_Now_Pitch_Omega();
+    inline float GetNowPitchOmega();
 
-    inline float Get_Target_Yaw_Angle();
+    inline float GetTargetYawAngle();
 
-    inline float Get_Target_Pitch_Angle();
+    inline float GetTargetPitchAngle();
 
-    inline float Get_Target_Yaw_Omega();
+    inline float GetTargetYawOmega();
 
-    inline float Get_Target_Pitch_Omega();
+    inline float GetTargetPitchOmega();
 
-    inline void Set_Target_Yaw_Angle(float __Target_Yaw_Angle);
+    inline void SetTargetYawAngle(float target_yaw_angle);
 
-    inline void Set_Target_Pitch_Angle(float __Target_Pitch_Angle);
+    inline void SetTargetPitchAngle(float target_pitch_angle);
 
-    inline void Set_Target_Yaw_Omega(float __Target_Yaw_Omega);
+    inline void SetTargetYawOmega(float target_yaw_omega);
 
-    inline void Set_Target_Pitch_Omega(float __Target_Pitch_Omega);
+    inline void SetTargetPitchOmega(float target_pitch_omega);
 
 protected:
     // pitch轴最小值
-    float Min_Pitch_Angle = -0.60f;
+    float min_pitch_angle_ = -0.60f;
     // pitch轴最大值
-    float Max_Pitch_Angle = 0.33f;
+    float max_pitch_angle_ = 0.33f;
 
     // 内部变量
 
     // 读变量
 
     // yaw轴当前角度
-    float Now_Yaw_Angle = 0.0f;
+    float now_yaw_angle_ = 0.0f;
     // pitch轴当前角度
-    float Now_Pitch_Angle = 0.0f;
+    float now_pitch_angle_ = 0.0f;
 
     // yaw轴当前角速度
-    float Now_Yaw_Omega = 0.0f;
+    float now_yaw_omega_ = 0.0f;
     // pitch轴当前角速度
-    float Now_Pitch_Omega = 0.0f;
+    float now_pitch_omega_ = 0.0f;
 
     // 写变量
 
     // 云台状态
-    Enum_Gimbal_Control_Type Gimbal_Control_Type = Gimbal_Control_Type_Manual;
+    GimbalControlType gimbal_control_type_ = GIMBAL_CONTROL_TYPE_MANUAL;
     // 读写变量
 
     // yaw轴目标角度
-    float Target_Yaw_Angle = 0.0f;
+    float target_yaw_angle_ = 0.0f;
     // pitch轴目标角度
-    float Target_Pitch_Angle = 0.0f;
+    float target_pitch_angle_ = 0.0f;
 
     // yaw轴目标角速度
-    float Target_Yaw_Omega = 0.0f;
+    float target_yaw_omega_ = 0.0f;
     // pitch轴目标角速度
-    float Target_Pitch_Omega = 0.0f;
+    float target_pitch_omega_ = 0.0f;
 
-    void Self_Resolution();
-    void _Motor_Nearest_Transposition();
+    void SelfResolution();
+    void MotorNearestTransposition();
     void Output();
     static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
 };
@@ -106,9 +116,9 @@ protected:
  *
  * @return float yaw轴当前角度
  */
-inline float Class_Gimbal::Get_Now_Yaw_Angle()
+inline float Gimbal::GetNowYawAngle()
 {
-    return (Now_Yaw_Angle);
+    return (now_yaw_angle_);
 }
 
 /**
@@ -116,9 +126,9 @@ inline float Class_Gimbal::Get_Now_Yaw_Angle()
  *
  * @return float pitch轴当前角度
  */
-inline float Class_Gimbal::Get_Now_Pitch_Angle()
+inline float Gimbal::GetNowPitchAngle()
 {
-    return (Now_Pitch_Angle);
+    return (now_pitch_angle_);
 }
 
 /**
@@ -126,9 +136,9 @@ inline float Class_Gimbal::Get_Now_Pitch_Angle()
  *
  * @return float yaw轴当前角速度
  */
-inline float Class_Gimbal::Get_Now_Yaw_Omega()
+inline float Gimbal::GetNowYawOmega()
 {
-    return (Now_Yaw_Omega);
+    return (now_yaw_omega_);
 }
 
 /**
@@ -136,9 +146,9 @@ inline float Class_Gimbal::Get_Now_Yaw_Omega()
  *
  * @return float pitch轴当前角速度
  */
-inline float Class_Gimbal::Get_Now_Pitch_Omega()
+inline float Gimbal::GetNowPitchOmega()
 {
-    return (Now_Pitch_Omega);
+    return (now_pitch_omega_);
 }
 
 /**
@@ -146,9 +156,9 @@ inline float Class_Gimbal::Get_Now_Pitch_Omega()
  *
  * @return float yaw轴目标角度
  */
-inline float Class_Gimbal::Get_Target_Yaw_Angle()
+inline float Gimbal::GetTargetYawAngle()
 {
-    return (Target_Yaw_Angle);
+    return (target_yaw_angle_);
 }
 
 /**
@@ -156,9 +166,9 @@ inline float Class_Gimbal::Get_Target_Yaw_Angle()
  *
  * @return float pitch轴目标角度
  */
-inline float Class_Gimbal::Get_Target_Pitch_Angle()
+inline float Gimbal::GetTargetPitchAngle()
 {
-    return (Target_Pitch_Angle);
+    return (target_pitch_angle_);
 }
 
 /**
@@ -166,9 +176,9 @@ inline float Class_Gimbal::Get_Target_Pitch_Angle()
  *
  * @return float yaw轴目标角速度
  */
-inline float Class_Gimbal::Get_Target_Yaw_Omega()
+inline float Gimbal::GetTargetYawOmega()
 {
-    return (Target_Yaw_Omega);
+    return (target_yaw_omega_);
 }
 
 /**
@@ -176,49 +186,49 @@ inline float Class_Gimbal::Get_Target_Yaw_Omega()
  *
  * @return float pitch轴目标角速度
  */
-inline float Class_Gimbal::Get_Target_Pitch_Omega()
+inline float Gimbal::GetTargetPitchOmega()
 {
-    return (Target_Pitch_Omega);
+    return (target_pitch_omega_);
 }
 
 /**
  * @brief 设定yaw轴角度
  *
- * @param __Target_Yaw_Angle yaw轴角度
+ * @param target_yaw_angle yaw轴角度
  */
-inline void Class_Gimbal::Set_Target_Yaw_Angle(float __Target_Yaw_Angle)
+inline void Gimbal::SetTargetYawAngle(float target_yaw_angle)
 {
-    Target_Yaw_Angle = __Target_Yaw_Angle;
+    target_yaw_angle_ = target_yaw_angle;
 }
 
 /**
  * @brief 设定pitch轴角度
  *
- * @param __Target_Pitch_Angle pitch轴角度
+ * @param target_pitch_angle pitch轴角度
  */
-inline void Class_Gimbal::Set_Target_Pitch_Angle(float __Target_Pitch_Angle)
+inline void Gimbal::SetTargetPitchAngle(float target_pitch_angle)
 {
-    Target_Pitch_Angle = __Target_Pitch_Angle;
+    target_pitch_angle_ = target_pitch_angle;
 }
 
 /**
  * @brief 设定yaw轴角速度
  *
- * @param __Target_Yaw_Omega yaw轴角速度
+ * @param target_yaw_omega yaw轴角速度
  */
-inline void Class_Gimbal::Set_Target_Yaw_Omega(float __Target_Yaw_Omega)
+inline void Gimbal::SetTargetYawOmega(float target_yaw_omega)
 {
-    Target_Yaw_Omega = __Target_Yaw_Omega;
+    target_yaw_omega_ = target_yaw_omega;
 }
 
 /**
  * @brief 设定pitch轴角速度
  *
- * @param __Target_Pitch_Omega pitch轴角速度
+ * @param target_pitch_omega pitch轴角速度
  */
-inline void Class_Gimbal::Set_Target_Pitch_Omega(float __Target_Pitch_Omega)
+inline void Gimbal::SetTargetPitchOmega(float target_pitch_omega)
 {
-    Target_Pitch_Omega = __Target_Pitch_Omega;
+    target_pitch_omega_ = target_pitch_omega;
 }
 
 

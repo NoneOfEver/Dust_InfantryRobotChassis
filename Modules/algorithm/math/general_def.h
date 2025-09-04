@@ -1,5 +1,5 @@
-#ifndef GENERAL_DEF_H
-#define GENERAL_DEF_H
+#ifndef MODULES_GENERAL_DEF_H_
+#define MODULES_GENERAL_DEF_H_
 
 // 一些module的通用数值型定义,注意条件macro兼容,一些宏可能在math.h中已经定义过了
 

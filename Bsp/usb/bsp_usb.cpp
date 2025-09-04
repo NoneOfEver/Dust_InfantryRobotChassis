@@ -6,7 +6,7 @@
 static uint8_t *bsp_usb_rx_buffer; // 接收到的数据会被放在这里,buffer size为2048
 // 注意usb单个数据包(Full speed模式下)最大为64byte,超出可能会出现丢包情况
 
-uint8_t *USBInit(USB_Init_Config_s usb_conf)
+uint8_t *usb_init(struct UsbInitConfig usb_conf)
 {
     // usb的软件复位(模拟拔插)在usbd_conf.c中的HAL_PCD_MspInit()中
     bsp_usb_rx_buffer = CDCInitRxbufferNcallback(usb_conf.tx_cbk, usb_conf.rx_cbk); // 获取接收数据指针
@@ -15,7 +15,7 @@ uint8_t *USBInit(USB_Init_Config_s usb_conf)
     return bsp_usb_rx_buffer;
 }
 
-void USBTransmit(uint8_t *buffer, uint16_t len)
+void usb_transmit(uint8_t *buffer, uint16_t len)
 {
     CDC_Transmit_HS(buffer, len); // 发送
 }
@@ -25,7 +25,7 @@ void USBRefresh()
 {
     // 重新枚举usb设备
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_RESET);
-    DWT_Delay(0.1);
+    dwt_delay(0.1);
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12, GPIO_PIN_SET);
-    DWT_Delay(0.1);
+    dwt_delay(0.1);
 }

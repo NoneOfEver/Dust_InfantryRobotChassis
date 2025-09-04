@@ -1,3 +1,13 @@
+/**
+ * @file bsp_log.c
+ * @author noe (noneofever@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-08-03
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
 #include "bsp_log.h"
 
 #include "SEGGER_RTT.h"
@@ -5,12 +15,12 @@
 #include <stdio.h>
 
 
-void BSPLogInit()
+void log_init()
 {
     SEGGER_RTT_Init();
 }
 
-int PrintLog(const char *fmt, ...)
+int print_log(const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
@@ -19,7 +29,7 @@ int PrintLog(const char *fmt, ...)
     return n;
 }
 
-void Float2Str(char *str, float va)
+void float2str(char *str, float va)
 {
     int flag = va < 0;
     int head = (int)va;

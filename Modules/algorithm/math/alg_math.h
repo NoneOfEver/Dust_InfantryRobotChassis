@@ -1,5 +1,15 @@
-#ifndef DRV_MATH_H
-#define DRV_MATH_H
+/**
+ * @file alg_math.h
+ * @author noe (noneofever@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-08-03
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+#ifndef MODULES_ALGORITHM_MATH_H_
+#define MODULES_ALGORITHM_MATH_H_
 /* Includes ------------------------------------------------------------------*/
 
 #include "stm32h7xx_hal.h"
@@ -25,27 +35,27 @@
 
 /* Exported function declarations --------------------------------------------*/
 
-void Math_Boolean_Logical_Not(bool *Value);
+void math_boolean_logical_not(bool *value);
 
-void Math_Endian_Reverse_16(void *Address);
+void math_endian_reverse_16(void *address);
 
-uint16_t Math_Endian_Reverse_16(void *Source, void *Destination);
+uint16_t math_endian_reverse_16(void *source, void *destination);
 
-void Math_Endian_Reverse_32(void *Address);
+void math_endian_reverse_32(void *address);
 
-uint32_t Math_Endian_Reverse_32(void *Source, void *Destination);
+uint32_t math_endian_reverse_32(void *source, void *destination);
 
-uint8_t Math_Sum_8(uint8_t *Address, uint32_t Length);
+uint8_t math_sum_8(uint8_t *address, uint32_t length);
 
-uint16_t Math_Sum_16(uint16_t *Address, uint32_t Length);
+uint16_t math_sum_16(uint16_t *address, uint32_t length);
 
-uint32_t Math_Sum_32(uint32_t *Address, uint32_t Length);
+uint32_t math_sum_32(uint32_t *address, uint32_t length);
 
-float Math_Sinc(float x);
+float math_sinc(float x);
 
-int32_t Math_Float_To_Int(float x, float Float_Min, float Float_Max, int32_t Int_Min, int32_t Int_Max);
+int32_t math_float_to_int(float x, float float_min, float float_max, int32_t int_min, int32_t int_max);
 
-float Math_Int_To_Float(int32_t x, int32_t Int_Min, int32_t Int_Max, float Float_Min, float Float_Max);
+float math_int_to_float(int32_t x, int32_t int_min, int32_t int_max, float float_min, float float_max);
 
 /**
  * @brief 限幅函数
@@ -56,15 +66,15 @@ float Math_Int_To_Float(int32_t x, int32_t Int_Min, int32_t Int_Max, float Float
  * @param Max 最大值
  */
 template<typename Type>
-Type Math_Constrain(Type *x, Type Min, Type Max)
+Type math_constrain(Type *x, Type min, Type max)
 {
-    if (*x < Min)
+    if (*x < min)
     {
-        *x = Min;
+        *x = min;
     }
-    else if (*x > Max)
+    else if (*x > max)
     {
-        *x = Max;
+        *x = max;
     }
     return (*x);
 }
@@ -77,7 +87,7 @@ Type Math_Constrain(Type *x, Type Min, Type Max)
  * @return Type x的绝对值
  */
 template<typename Type>
-Type Math_Abs(Type x)
+Type math_abs(Type x)
 {
     return ((x > 0) ? x : -x);
 }
@@ -91,7 +101,7 @@ Type Math_Abs(Type x)
  * @return Type 返回的归化数, 介于 ±modulus / 2 之间
  */
 template<typename Type>
-Type Math_Modulus_Normalization(Type x, Type modulus)
+Type math_modulus_normalization(Type x, Type modulus)
 {
     float tmp;
 

@@ -32,8 +32,8 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static USBCallback tx_cbk = NULL;
-static USBCallback rx_cbk = NULL;
+static UsbCallback tx_cbk = NULL;
+static UsbCallback rx_cbk = NULL;
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -322,7 +322,7 @@ static int8_t CDC_TransmitCplt_HS(uint8_t *Buf, uint32_t *Len, uint8_t epnum)
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
-uint8_t* CDCInitRxbufferNcallback(USBCallback transmit_cbk,USBCallback recv_cbk)
+uint8_t* CDCInitRxbufferNcallback(UsbCallback transmit_cbk,UsbCallback recv_cbk)
 {
   tx_cbk = transmit_cbk;
   rx_cbk = recv_cbk;

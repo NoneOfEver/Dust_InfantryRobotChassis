@@ -1,9 +1,9 @@
 /**
- * @file Bsp_PWM.c
+ * @file bsp_pwm.c
  * @author noe (noneofever@gmail.com)
  * @brief 
  * @version 0.1
- * @date 2025-01-15
+ * @date 2025-08-15
  * 
  * @copyright Copyright (c) 2025
  * 
@@ -15,7 +15,7 @@
 
 // 配合中断以及初始化
 static uint8_t idx;
-static PWMInstance *pwm_instance[PWM_DEVICE_CNT] = {NULL}; // 所有的pwm instance保存于此,用于callback时判断中断来源
+static PwmInstance *pwm_instance[PWM_DEVICE_CNT] = {NULL}; // 所有的pwm instance保存于此,用于callback时判断中断来源
 //static uint32_t PWMSelectTclk(TIM_HandleTypeDef *htim );
 /**
  * @brief pwm dma传输完成回调函数
@@ -35,13 +35,13 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim)
     }
 }
 
-PWMInstance *PWMRegister(PWM_Init_Config_s *config)
+PwmInstance *PWMRegister(struct PwmInitConfig *config)
 {
     if (idx >= PWM_DEVICE_CNT) // 超过最大实例数,考虑增加或查看是否有内存泄漏
         while (1)
             ;
-    PWMInstance *pwm = (PWMInstance *)malloc(sizeof(PWMInstance));
-    memset(pwm, 0, sizeof(PWMInstance));
+    PwmInstance *pwm = (PwmInstance *)malloc(sizeof(PwmInstance));
+    memset(pwm, 0, sizeof(PwmInstance));
 
     pwm->htim = config->htim;
     pwm->channel = config->channel;
@@ -52,20 +52,20 @@ PWMInstance *PWMRegister(PWM_Init_Config_s *config)
     //pwm->tclk = PWMSelectTclk(pwm->htim);
     // 启动PWM
     HAL_TIM_PWM_Start(pwm->htim, pwm->channel);
-    PWMSetPeriod(pwm, pwm->period);
-    PWMSetDutyRatio(pwm, pwm->dutyratio);
+    pwm_set_period(pwm, pwm->period);
+    pwm_set_duty_ratio(pwm, pwm->dutyratio);
     pwm_instance[idx++] = pwm;
     return pwm;
 }
 
 /* 只是对HAL的函数进行了形式上的封装 */
-void PWMStart(PWMInstance *pwm)
+void pwm_start(struct PwmInstance *pwm)
 {
     HAL_TIM_PWM_Start(pwm->htim, pwm->channel);
 }
 
 /* 只是对HAL的函数进行了形式上的封装 */
-void PWMStop(PWMInstance *pwm)
+void pwm_stop(struct PwmInstance *pwm)
 {
     HAL_TIM_PWM_Stop(pwm->htim, pwm->channel);
 }
@@ -76,7 +76,7 @@ void PWMStop(PWMInstance *pwm)
  * @param pwm pwm实例
  * @param period 周期 单位 s
  */
-void PWMSetPeriod(PWMInstance *pwm, float period)
+void pwm_set_period(struct PwmInstance *pwm, float period)
 {
     __HAL_TIM_SetAutoreload(pwm->htim, period*((pwm->tclk)/(pwm->htim->Init.Prescaler+1)));
 }
@@ -86,13 +86,13 @@ void PWMSetPeriod(PWMInstance *pwm, float period)
     * @param pwm pwm实例
     * @param dutyratio 占空比 0~1
 */
-void PWMSetDutyRatio(PWMInstance *pwm, float dutyratio)
+void pwm_set_duty_ratio(struct PwmInstance *pwm, float dutyratio)
 {
     __HAL_TIM_SetCompare(pwm->htim, pwm->channel, dutyratio * (pwm->htim->Instance->ARR));
 }
 
 /* 只是对HAL的函数进行了形式上的封装 */
-void PWMStartDMA(PWMInstance *pwm, uint32_t *pData, uint32_t Size)
+void pwm_start_dma(struct PwmInstance *pwm, uint32_t *pData, uint32_t Size)
 {
     HAL_TIM_PWM_Start_DMA(pwm->htim, pwm->channel, pData, Size);
 }

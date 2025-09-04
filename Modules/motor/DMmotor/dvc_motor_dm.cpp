@@ -1,17 +1,16 @@
 /**
  * @file dvc_motor_dm.cpp
- * @author yssickjgd (1345578933@qq.com)
- * @brief 达妙电机配置与操作
+ * @author noe (noneofever@gmail.com)
+ * @brief 
  * @version 0.1
- * @date 2023-08-30 0.1 新增
- *
- * @copyright USTC-RoboWalker (c) 2023
- *
+ * @date 2025-08-04
+ * 
+ * @copyright Copyright (c) 2025
+ * 
  */
-
 /* Includes ------------------------------------------------------------------*/
 
-#include "dvc_motor_dm.hpp"
+#include "dvc_motor_dm.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -20,16 +19,16 @@
 /* Private variables ---------------------------------------------------------*/
 
 // 清除电机错误信息, 传统模式有效
-uint8_t DM_Motor_CAN_Message_Clear_Error[8] = {0xff,
-                                               0xff,
-                                               0xff,
-                                               0xff,
-                                               0xff,
-                                               0xff,
-                                               0xff,
-                                               0xfb};
+uint8_t kDmMotorCanMessageClearError[8] = {0xff,
+                                                 0xff,
+                                                 0xff,
+                                                 0xff,
+                                                 0xff,
+                                                 0xff,
+                                                 0xff,
+                                                 0xfb};
 // 使能电机, 传统模式有效
-uint8_t DM_Motor_CAN_Message_Enter[8] = {0xff,
+uint8_t kDmMotorCANMessageEnter[8] = {0xff,
                                          0xff,
                                          0xff,
                                          0xff,
@@ -38,7 +37,7 @@ uint8_t DM_Motor_CAN_Message_Enter[8] = {0xff,
                                          0xff,
                                          0xfc};
 // 失能电机, 传统模式有效
-uint8_t DM_Motor_CAN_Message_Exit[8] = {0xff,
+uint8_t kDmMotorCanMessageExit[8] = {0xff,
                                         0xff,
                                         0xff,
                                         0xff,
@@ -47,7 +46,7 @@ uint8_t DM_Motor_CAN_Message_Exit[8] = {0xff,
                                         0xff,
                                         0xfd};
 // 保存当前电机位置为零点, 传统模式有效
-uint8_t DM_Motor_CAN_Message_Save_Zero[8] = {0xff,
+uint8_t kDmMotorCANMessageSaveZero[8] = {0xff,
                                              0xff,
                                              0xff,
                                              0xff,
@@ -64,62 +63,62 @@ uint8_t DM_Motor_CAN_Message_Save_Zero[8] = {0xff,
  * @brief 分配CAN发送缓冲区, 一拖四模式有效
  *
  * @param hcan CAN编号
- * @param __CAN_ID CAN ID
+ * @param __can_id CAN ID
  * @param __DJI_Motor_Driver_Version 大疆驱动版本, 当且仅当当前被分配电机为6020, 且是电流驱动新版本时选2023, 否则都是default
  * @return uint8_t* 缓冲区指针
  */
-uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, enum Enum_Motor_DM_Motor_ID_1_To_4 __CAN_Rx_ID_1_To_4)
+uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, enum MotorDmMotorId1To4 can_rx_id_1_to_4)
 {
     uint8_t *tmp_tx_data_ptr;
     if (hcan == &hfdcan1)
     {
-        switch (__CAN_Rx_ID_1_To_4)
+        switch (can_rx_id_1_to_4)
         {
-        case (Motor_DM_ID_0x301):
+        case (MOTOR_DM_ID_0x301):
         {
-            tmp_tx_data_ptr = &(CAN1_0x3fe_Tx_Data[0]);
+            tmp_tx_data_ptr = &(g_can1_0x3fe_tx_data[0]);
 
             break;
         }
-        case (Motor_DM_ID_0x302):
+        case (MOTOR_DM_ID_0x302):
         {
-            tmp_tx_data_ptr = &(CAN1_0x3fe_Tx_Data[2]);
+            tmp_tx_data_ptr = &(g_can1_0x3fe_tx_data[2]);
 
             break;
         }
-        case (Motor_DM_ID_0x303):
+        case (MOTOR_DM_ID_0x303):
         {
-            tmp_tx_data_ptr = &(CAN1_0x3fe_Tx_Data[4]);
+            tmp_tx_data_ptr = &(g_can1_0x3fe_tx_data[4]);
 
             break;
         }
-        case (Motor_DM_ID_0x304):
+        case (MOTOR_DM_ID_0x304):
         {
-            tmp_tx_data_ptr = &(CAN1_0x3fe_Tx_Data[6]);
+            tmp_tx_data_ptr = &(g_can1_0x3fe_tx_data[6]);
 
             break;
         }
-        case (Motor_DM_ID_0x305):
+        case (MOTOR_DM_ID_0x305):
         {
-            tmp_tx_data_ptr = &(CAN1_0x4fe_Tx_Data[0]);
+            tmp_tx_data_ptr = &(g_can1_0x4fe_tx_data[0]);
 
             break;
         }
-        case (Motor_DM_ID_0x306):
+        case (MOTOR_DM_ID_0x306):
         {
-            tmp_tx_data_ptr = &(CAN1_0x4fe_Tx_Data[2]);
+            tmp_tx_data_ptr = &(g_can1_0x4fe_tx_data[2]);
 
             break;
         }
-        case (Motor_DM_ID_0x307):
+        case (MOTOR_DM_ID_0x307):
         {
-            tmp_tx_data_ptr = &(CAN1_0x4fe_Tx_Data[4]);
+            tmp_tx_data_ptr = &(g_can1_0x4fe_tx_data[4]);
 
             break;
         }
-        case (Motor_DM_ID_0x308):
+        case (MOTOR_DM_ID_0x308):
         {
-            tmp_tx_data_ptr = &(CAN1_0x4fe_Tx_Data[6]);
+            tmp_tx_data_ptr = &(g_can1_0x4fe_tx_data[6]);
 
             break;
         }
@@ -127,53 +126,53 @@ uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, enum Enum_Motor_DM_Motor_ID
     }
     else if (hcan == &hfdcan2)
     {
-        switch (__CAN_Rx_ID_1_To_4)
+        switch (can_rx_id_1_to_4)
         {
-        case (Motor_DM_ID_0x301):
+        case (MOTOR_DM_ID_0x301):
         {
-            tmp_tx_data_ptr = &(CAN2_0x3fe_Tx_Data[0]);
+            tmp_tx_data_ptr = &(g_can2_0x3fe_tx_data[0]);
 
             break;
         }
-        case (Motor_DM_ID_0x302):
+        case (MOTOR_DM_ID_0x302):
         {
-            tmp_tx_data_ptr = &(CAN2_0x3fe_Tx_Data[2]);
+            tmp_tx_data_ptr = &(g_can2_0x3fe_tx_data[2]);
 
             break;
         }
-        case (Motor_DM_ID_0x303):
+        case (MOTOR_DM_ID_0x303):
         {
-            tmp_tx_data_ptr = &(CAN2_0x3fe_Tx_Data[4]);
+            tmp_tx_data_ptr = &(g_can2_0x3fe_tx_data[4]);
 
             break;
         }
-        case (Motor_DM_ID_0x304):
+        case (MOTOR_DM_ID_0x304):
         {
-            tmp_tx_data_ptr = &(CAN2_0x3fe_Tx_Data[6]);
+            tmp_tx_data_ptr = &(g_can2_0x3fe_tx_data[6]);
 
             break;
         }
-        case (Motor_DM_ID_0x305):
+        case (MOTOR_DM_ID_0x305):
         {
-            tmp_tx_data_ptr = &(CAN2_0x4fe_Tx_Data[0]);
+            tmp_tx_data_ptr = &(g_can2_0x4fe_tx_data[0]);
 
             break;
         }
-        case (Motor_DM_ID_0x306):
+        case (MOTOR_DM_ID_0x306):
         {
-            tmp_tx_data_ptr = &(CAN2_0x4fe_Tx_Data[2]);
+            tmp_tx_data_ptr = &(g_can2_0x4fe_tx_data[2]);
 
             break;
         }
-        case (Motor_DM_ID_0x307):
+        case (MOTOR_DM_ID_0x307):
         {
-            tmp_tx_data_ptr = &(CAN2_0x4fe_Tx_Data[4]);
+            tmp_tx_data_ptr = &(g_can2_0x4fe_tx_data[4]);
 
             break;
         }
-        case (Motor_DM_ID_0x308):
+        case (MOTOR_DM_ID_0x308):
         {
-            tmp_tx_data_ptr = &(CAN2_0x4fe_Tx_Data[6]);
+            tmp_tx_data_ptr = &(g_can2_0x4fe_tx_data[6]);
 
             break;
         }
@@ -186,138 +185,139 @@ uint8_t *allocate_tx_data(FDCAN_HandleTypeDef *hcan, enum Enum_Motor_DM_Motor_ID
  * @brief 电机初始化
  *
  * @param hcan 绑定的CAN总线
- * @param __CAN_Rx_ID 收数据绑定的CAN ID, 与上位机驱动参数Master_ID保持一致, 传统模式有效
- * @param __CAN_Tx_ID 发数据绑定的CAN ID, 是上位机驱动参数CAN_ID加上控制模式的偏移量, 传统模式有效
- * @param __Motor_DM_Control_Method 电机控制方式
- * @param __Angle_Max 最大位置, 与上位机控制幅值PMAX保持一致, 传统模式有效
- * @param __Omega_Max 最大速度, 与上位机控制幅值VMAX保持一致, 传统模式有效
- * @param __Torque_Max 最大扭矩, 与上位机控制幅值TMAX保持一致, 传统模式有效
+ * @param can_rx_id 收数据绑定的CAN ID, 与上位机驱动参数Master_ID保持一致, 传统模式有效
+ * @param can_tx_id 发数据绑定的CAN ID, 是上位机驱动参数can_id加上控制模式的偏移量, 传统模式有效
+ * @param motor_dm_control_method 电机控制方式
+ * @param angle_max 最大位置, 与上位机控制幅值PMAX保持一致, 传统模式有效
+ * @param omega_max 最大速度, 与上位机控制幅值VMAX保持一致, 传统模式有效
+ * @param torque_max 最大扭矩, 与上位机控制幅值TMAX保持一致, 传统模式有效
  */
-void Class_Motor_DM_Normal::Init(
+void MotorDmNormal::Init(
     FDCAN_HandleTypeDef *hcan,
-    uint8_t __CAN_Rx_ID,
-    uint8_t __CAN_Tx_ID,
-    enum Enum_Motor_DM_Control_Method __Motor_DM_Control_Method,
-    float __Angle_Max, float __Omega_Max,
-    float __Torque_Max,
-    float __Current_Max)
+    uint8_t can_rx_id,
+    uint8_t can_tx_id,
+    enum MotorDmControlMethod motor_dm_control_method,
+    float angle_max, 
+    float omega_max,
+    float torque_max,
+    float current_max)
 {
     if (hcan->Instance == FDCAN1)
     {
-        CAN_Manage_Object = &CAN1_Manage_Object;
+        can_manage_object_ = &g_can1_manage_object;
     }
     else if (hcan->Instance == FDCAN2)
     {
-        CAN_Manage_Object = &CAN2_Manage_Object;
+        can_manage_object_ = &g_can2_manage_object;
     }
     else if (hcan->Instance == FDCAN3)
     {
-        CAN_Manage_Object = &CAN3_Manage_Object;
+        can_manage_object_ = &g_can3_manage_object;
     }
 
-    CAN_Rx_ID = __CAN_Rx_ID;
-    switch (__Motor_DM_Control_Method)
+    can_rx_id_ = can_rx_id;
+    switch (motor_dm_control_method)
     {
-    case (Motor_DM_Control_Method_NORMAL_MIT):
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_MIT):
     {
-        CAN_Tx_ID = __CAN_Tx_ID;
+        can_tx_id_ = can_tx_id;
         break;
     }
-    case (Motor_DM_Control_Method_NORMAL_ANGLE_OMEGA):
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_ANGLE_OMEGA):
     {
-        CAN_Tx_ID = __CAN_Tx_ID + 0x100;
+        can_tx_id_ = can_tx_id + 0x100;
         break;
     }
-    case (Motor_DM_Control_Method_NORMAL_OMEGA):
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_OMEGA):
     {
-        CAN_Tx_ID = __CAN_Tx_ID + 0x200;
+        can_tx_id_ = can_tx_id + 0x200;
         break;
     }
-    case (Motor_DM_Control_Method_NORMAL_EMIT):
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_EMIT):
     {
-        CAN_Tx_ID = __CAN_Tx_ID + 0x300;
+        can_tx_id_ = can_tx_id + 0x300;
         break;
     }
     }
-    Motor_DM_Control_Method = __Motor_DM_Control_Method;
-    Angle_Max = __Angle_Max;
-    Omega_Max = __Omega_Max;
-    Torque_Max = __Torque_Max;
-    Current_Max = __Current_Max;
+    motor_dm_control_method_ = motor_dm_control_method;
+    angle_max_ = angle_max;
+    omega_max_ = omega_max;
+    torque_max_ = torque_max;
+    current_max_ = current_max;
 }
 
 /**
  * @brief CAN通信接收回调函数
  *
- * @param Rx_Data 接收的数据
+ * @param rx_data_ 接收的数据
  */
-void Class_Motor_DM_Normal::CAN_RxCpltCallback(uint8_t *Rx_Data)
+void MotorDmNormal::CanRxCpltCallback(uint8_t *rx_data_)
 {
     // 滑动窗口, 判断电机是否在线
-    Flag += 1;
+    flag_ += 1;
 
-    Data_Process();
+    DataProcess();
 }
 
 /**
  * @brief 发送清除错误信息
  *
  */
-void Class_Motor_DM_Normal::CAN_Send_Clear_Error()
+void MotorDmNormal::CanSendClearError()
 {
-    CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, DM_Motor_CAN_Message_Clear_Error, 8);
+    can_send_data(can_manage_object_->can_handler, can_tx_id_, kDmMotorCanMessageClearError, 8);
 }
 
 /**
  * @brief 发送使能电机
  *
  */
-void Class_Motor_DM_Normal::CAN_Send_Enter()
+void MotorDmNormal::CanSendEnter()
 {
-    CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, DM_Motor_CAN_Message_Enter, 8);
+    can_send_data(can_manage_object_->can_handler, can_tx_id_, kDmMotorCANMessageEnter, 8);
 }
 
 /**
  * @brief 发送失能电机
  *
  */
-void Class_Motor_DM_Normal::CAN_Send_Exit()
+void MotorDmNormal::CanSendExit()
 {
-    CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, DM_Motor_CAN_Message_Exit, 8);
+    can_send_data(can_manage_object_->can_handler, can_tx_id_, kDmMotorCanMessageExit, 8);
 }
 
 /**
  * @brief 发送保存当前位置为零点
  *
  */
-void Class_Motor_DM_Normal::CAN_Send_Save_Zero()
+void MotorDmNormal::CanSendSaveZero()
 {
-    CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, DM_Motor_CAN_Message_Save_Zero, 8);
+    can_send_data(can_manage_object_->can_handler, can_tx_id_, kDmMotorCANMessageSaveZero, 8);
 }
 
 /**
  * @brief TIM定时器中断定期检测电机是否存活, 检测周期取决于电机掉线时长
  *
  */
-void Class_Motor_DM_Normal::TIM_Alive_PeriodElapsedCallback()
+void MotorDmNormal::AlivePeriodElapsedCallback()
 {
     // 判断该时间段内是否接收过电机数据
-    if (Flag == Pre_Flag)
+    if (flag_ == pre_flag_)
     {
         // 电机断开连接
-        Motor_DM_Status = Motor_DM_Status_DISABLE;
+        motor_dm_status_ = MOTOR_DM_STATUS_DISABLE;
     }
     else
     {
         // 电机保持连接
-        Motor_DM_Status = Motor_DM_Status_ENABLE;
+        motor_dm_status_ = MOTOR_DM_STATUS_ENABLE;
     }
 
-    Pre_Flag = Flag;
+    pre_flag_ = flag_;
 
-    if(Motor_DM_Status == Motor_DM_Status_DISABLE)
+    if(motor_dm_status_ == MOTOR_DM_STATUS_DISABLE)
     {
-        CAN_Send_Enter();
+        CanSendEnter();
     }
 }
 
@@ -325,29 +325,29 @@ void Class_Motor_DM_Normal::TIM_Alive_PeriodElapsedCallback()
  * @brief TIM定时器中断发送出去的回调函数, 计算周期取决于自主设置的控制周期
  *
  */
-void Class_Motor_DM_Normal::TIM_Send_PeriodElapsedCallback()
+void MotorDmNormal::SendPeriodElapsedCallback()
 {
-    if (Rx_Data.Control_Status == Motor_DM_Control_Status_ENABLE)
+    if (rx_data_.control_status == MOTOR_DM_CONTROL_STATUS_ENABLE)
     {
         // 电机在线, 正常控制
-        Math_Constrain(&Control_Angle, -Angle_Max, Angle_Max);
-        Math_Constrain(&Control_Omega, -Omega_Max, Omega_Max);
-        Math_Constrain(&Control_Torque, -Torque_Max, Torque_Max);
-        Math_Constrain(&Control_Current, -Current_Max, Current_Max);
-        Math_Constrain(&K_P, 0.0f, 500.0f);
-        Math_Constrain(&K_D, 0.0f, 5.0f);
+        math_constrain(&control_angle_, -angle_max_, angle_max_);
+        math_constrain(&control_omega_, -omega_max_, omega_max_);
+        math_constrain(&control_torque_, -torque_max_, torque_max_);
+        math_constrain(&control_current_, -current_max_, current_max_);
+        math_constrain(&k_p_, 0.0f, 500.0f);
+        math_constrain(&k_d_, 0.0f, 5.0f);
 
         Output();
     }
-    else if (Rx_Data.Control_Status == Motor_DM_Control_Status_DISABLE)
+    else if (rx_data_.control_status == MOTOR_DM_CONTROL_STATUS_DISABLE)
     {
         // 电机可能掉线, 使能电机
-        CAN_Send_Enter();
+        CanSendEnter();
     }
     else
     {
         // 电机错误, 发送清除错误帧
-        CAN_Send_Clear_Error();
+        CanSendClearError();
     }
 }
 
@@ -355,114 +355,114 @@ void Class_Motor_DM_Normal::TIM_Send_PeriodElapsedCallback()
  * @brief 数据处理过程
  *
  */
-void Class_Motor_DM_Normal::Data_Process()
+void MotorDmNormal::DataProcess()
 {
     // 数据处理过程
     int32_t delta_encoder;
     uint16_t tmp_encoder, tmp_omega, tmp_torque;
-    Struct_Motor_DM_CAN_Rx_Data_Normal *tmp_buffer = (Struct_Motor_DM_CAN_Rx_Data_Normal *)CAN_Manage_Object->Rx_Buffer.Data;
+    MotorDmCanRxDataNormal *tmp_buffer = (MotorDmCanRxDataNormal *)can_manage_object_->rx_buffer.data;
 
     // 电机ID不匹配, 则不进行处理
-    if(tmp_buffer->CAN_ID != (CAN_Tx_ID & 0x0f))
+    if(tmp_buffer->can_id != (can_tx_id_ & 0x0f))
     {
         return;
     }
 
     // 处理大小端
-    Math_Endian_Reverse_16((void *)&tmp_buffer->Angle_Reverse, &tmp_encoder);
-    tmp_omega = (tmp_buffer->Omega_11_4 << 4) | (tmp_buffer->Omega_3_0_Torque_11_8 >> 4);
-    tmp_torque = ((tmp_buffer->Omega_3_0_Torque_11_8 & 0x0f) << 8) | (tmp_buffer->Torque_7_0);
+    math_endian_reverse_16((void *)&tmp_buffer->angle_reverse, &tmp_encoder);
+    tmp_omega = (tmp_buffer->omega_11_4 << 4) | (tmp_buffer->omega_3_0_torque_11_8 >> 4);
+    tmp_torque = ((tmp_buffer->omega_3_0_torque_11_8 & 0x0f) << 8) | (tmp_buffer->torque_7_0);
 
-    Rx_Data.Control_Status = static_cast<Enum_Motor_DM_Control_Status_Normal>(tmp_buffer->Control_Status_Enum);
+    rx_data_.control_status = static_cast<MotorDmControlStatusNormal>(tmp_buffer->control_status_enum);
 
     // 计算圈数与总角度值
-    delta_encoder = tmp_encoder - Rx_Data.Pre_Encoder;
+    delta_encoder = tmp_encoder - rx_data_.pre_encoder;
     if (delta_encoder < -(1 << 15))
     {
         // 正方向转过了一圈
-        Rx_Data.Total_Round++;
+        rx_data_.total_round++;
     }
     else if (delta_encoder > (1 << 15))
     {
         // 反方向转过了一圈
-        Rx_Data.Total_Round--;
+        rx_data_.total_round--;
     }
-    Rx_Data.Total_Encoder = Rx_Data.Total_Round * (1 << 16) + tmp_encoder - ((1 << 15) - 1);
+    rx_data_.total_encoder = rx_data_.total_round * (1 << 16) + tmp_encoder - ((1 << 15) - 1);
 
     // 计算电机本身信息
-    Rx_Data.Now_Angle = (float)(Rx_Data.Total_Encoder) / (float)((1 << 16) - 1) * Angle_Max * 2.0f;
-    Rx_Data.Now_Omega = Math_Int_To_Float(tmp_omega, 0x7ff, (1 << 12) - 1, 0, Omega_Max);
-    Rx_Data.Now_Torque = Math_Int_To_Float(tmp_torque, 0x7ff, (1 << 12) - 1, 0, Torque_Max);
-    Rx_Data.Now_MOS_Temperature = tmp_buffer->MOS_Temperature + CELSIUS_TO_KELVIN;
-    Rx_Data.Now_Rotor_Temperature = tmp_buffer->Rotor_Temperature + CELSIUS_TO_KELVIN;
+    rx_data_.now_angle = (float)(rx_data_.total_encoder) / (float)((1 << 16) - 1) * angle_max_ * 2.0f;
+    rx_data_.now_omega = math_int_to_float(tmp_omega, 0x7ff, (1 << 12) - 1, 0, omega_max_);
+    rx_data_.now_torque = math_int_to_float(tmp_torque, 0x7ff, (1 << 12) - 1, 0, torque_max_);
+    rx_data_.now_mos_temperature = tmp_buffer->mos_temperature + CELSIUS_TO_KELVIN;
+    rx_data_.now_rotor_temperature = tmp_buffer->rotor_temperature + CELSIUS_TO_KELVIN;
 
     // 存储预备信息
-    Rx_Data.Pre_Encoder = tmp_encoder;
+    rx_data_.pre_encoder = tmp_encoder;
 }
 
 /**
  * @brief 电机数据输出到CAN总线
  *
  */
-void Class_Motor_DM_Normal::Output()
+void MotorDmNormal::Output()
 {
     // 电机控制
-    switch (Motor_DM_Control_Method)
+    switch (motor_dm_control_method_)
     {
-    case (Motor_DM_Control_Method_NORMAL_MIT):
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_MIT):
     {
-        Struct_Motor_DM_CAN_Tx_Data_Normal_MIT *tmp_buffer = (Struct_Motor_DM_CAN_Tx_Data_Normal_MIT *)Tx_Data;
+        MotorDmCanTxDataNormalMit *tmp_buffer = (MotorDmCanTxDataNormalMit *)tx_data_;
 
         uint16_t tmp_angle, tmp_omega, tmp_torque, tmp_k_p, tmp_k_d;
 
-        tmp_angle = Math_Float_To_Int(Control_Angle, 0, Angle_Max, 0x7fff, (1 << 16) - 1);
-        tmp_omega = Math_Float_To_Int(Control_Omega, 0, Omega_Max, 0x7ff, (1 << 12) - 1);
-        tmp_torque = Math_Float_To_Int(Control_Torque, 0, Torque_Max, 0x7ff, (1 << 12) - 1);
-        tmp_k_p = Math_Float_To_Int(K_P, 0, 500.0f, 0, (1 << 12) - 1);
-        tmp_k_d = Math_Float_To_Int(K_D, 0, 5.0f, 0, (1 << 12) - 1);
+        tmp_angle = math_float_to_int(control_angle_, 0, angle_max_, 0x7fff, (1 << 16) - 1);
+        tmp_omega = math_float_to_int(control_omega_, 0, omega_max_, 0x7ff, (1 << 12) - 1);
+        tmp_torque = math_float_to_int(control_torque_, 0, torque_max_, 0x7ff, (1 << 12) - 1);
+        tmp_k_p = math_float_to_int(k_p_, 0, 500.0f, 0, (1 << 12) - 1);
+        tmp_k_d = math_float_to_int(k_d_, 0, 5.0f, 0, (1 << 12) - 1);
 
-        tmp_buffer->Control_Angle_Reverse = Math_Endian_Reverse_16(&tmp_angle, nullptr);
-        tmp_buffer->Control_Omega_11_4 = tmp_omega >> 4;
-        tmp_buffer->Control_Omega_3_0_K_P_11_8 = ((tmp_omega & 0x0f) << 4) | (tmp_k_p >> 8);
-        tmp_buffer->K_P_7_0 = tmp_k_p & 0xff;
-        tmp_buffer->K_D_11_4 = tmp_k_d >> 4;
-        tmp_buffer->K_D_3_0_Control_Torque_11_8 = ((tmp_k_d & 0x0f) << 4) | (tmp_torque >> 8);
-        tmp_buffer->Control_Torque_7_0 = tmp_torque & 0xff;
+        tmp_buffer->control_angle_reverse = math_endian_reverse_16(&tmp_angle, nullptr);
+        tmp_buffer->control_omega_11_4 = tmp_omega >> 4;
+        tmp_buffer->control_omega_3_0_k_p_11_8 = ((tmp_omega & 0x0f) << 4) | (tmp_k_p >> 8);
+        tmp_buffer->k_p_7_0 = tmp_k_p & 0xff;
+        tmp_buffer->k_d_11_4 = tmp_k_d >> 4;
+        tmp_buffer->k_d_3_0_control_torque_11_8 = ((tmp_k_d & 0x0f) << 4) | (tmp_torque >> 8);
+        tmp_buffer->control_torque_7_0 = tmp_torque & 0xff;
 
-        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, Tx_Data, 8);
-
-        break;
-    }
-    case (Motor_DM_Control_Method_NORMAL_ANGLE_OMEGA):
-    {
-        Struct_Motor_DM_CAN_Tx_Data_Normal_Angle_Omega *tmp_buffer = (Struct_Motor_DM_CAN_Tx_Data_Normal_Angle_Omega *)Tx_Data;
-
-        tmp_buffer->Control_Angle = Control_Angle;
-        tmp_buffer->Control_Omega = Control_Omega;
-
-        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, Tx_Data, 8);
+        can_send_data(can_manage_object_->can_handler, can_tx_id_, tx_data_, 8);
 
         break;
     }
-    case (Motor_DM_Control_Method_NORMAL_OMEGA):
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_ANGLE_OMEGA):
     {
-        Struct_Motor_DM_CAN_Tx_Data_Normal_Omega *tmp_buffer = (Struct_Motor_DM_CAN_Tx_Data_Normal_Omega *)Tx_Data;
+        MotorDmCanTxDataNormalAngleOmega *tmp_buffer = (MotorDmCanTxDataNormalAngleOmega *)tx_data_;
 
-        tmp_buffer->Control_Omega = Control_Omega;
+        tmp_buffer->control_angle_ = control_angle_;
+        tmp_buffer->control_omega_ = control_omega_;
 
-        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, Tx_Data, 4);
+        can_send_data(can_manage_object_->can_handler, can_tx_id_, tx_data_, 8);
 
         break;
     }
-    case (Motor_DM_Control_Method_NORMAL_EMIT):
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_OMEGA):
     {
-        Struct_Motor_DM_CAN_Tx_Data_Normal_EMIT *tmp_buffer = (Struct_Motor_DM_CAN_Tx_Data_Normal_EMIT *)Tx_Data;
+        MotorDmCanTxDataNormalOmega *tmp_buffer = (MotorDmCanTxDataNormalOmega *)tx_data_;
 
-        tmp_buffer->Control_Angle = Control_Angle;
-        tmp_buffer->Control_Omega = (uint16_t)(Control_Omega * 100.0f);
-        tmp_buffer->Control_Current = (uint16_t)(Control_Current / Current_Max * 10000.0f);
+        tmp_buffer->control_omega_ = control_omega_;
 
-        CAN_Send_Data(CAN_Manage_Object->CAN_Handler, CAN_Tx_ID, Tx_Data, 8);
+        can_send_data(can_manage_object_->can_handler, can_tx_id_, tx_data_, 4);
+
+        break;
+    }
+    case (MOTOR_DM_CONTROL_METHOD_NORMAL_EMIT):
+    {
+        MotorDmCanTxDataNormalEmit *tmp_buffer = (MotorDmCanTxDataNormalEmit *)tx_data_;
+
+        tmp_buffer->control_angle = control_angle_;
+        tmp_buffer->control_omega = (uint16_t)(control_omega_ * 100.0f);
+        tmp_buffer->control_current = (uint16_t)(control_current_ / current_max_ * 10000.0f);
+
+        can_send_data(can_manage_object_->can_handler, can_tx_id_, tx_data_, 8);
 
         break;
     }
@@ -473,164 +473,169 @@ void Class_Motor_DM_Normal::Output()
  * @brief 电机初始化
  * 
  * @param hcan 绑定的CAN总线
- * @param __CAN_Rx_ID 绑定的CAN ID
- * @param __Motor_DM_Control_Method 电机控制方式, 默认角度
- * @param __Encoder_Offset 编码器偏移, 默认0
- * @param __Current_Max 最大电流
+ * @param can_rx_id 绑定的CAN ID
+ * @param motor_dm_control_method 电机控制方式, 默认角度
+ * @param encoder_offset 编码器偏移, 默认0
+ * @param current_max 最大电流
  */
-void Class_Motor_DM_1_To_4::Init(FDCAN_HandleTypeDef *hcan, Enum_Motor_DM_Motor_ID_1_To_4 __CAN_Rx_ID, Enum_Motor_DM_Control_Method __Motor_DM_Control_Method, int32_t __Encoder_Offset, float __Current_Max)
+void MotorDm1To4::Init(
+    FDCAN_HandleTypeDef *hcan, 
+    MotorDmMotorId1To4 can_rx_id, 
+    MotorDmControlMethod motor_dm_control_method, 
+    int32_t encoder_offset, 
+    float current_max)
 {
     if (hcan->Instance == FDCAN1)
     {
-        CAN_Manage_Object = &CAN1_Manage_Object;
+        can_manage_object_ = &g_can1_manage_object;
     }
     else if (hcan->Instance == FDCAN2)
     {
-        CAN_Manage_Object = &CAN2_Manage_Object;
+        can_manage_object_ = &g_can2_manage_object;
     }
-    CAN_Rx_ID = __CAN_Rx_ID;
-    Motor_DM_Control_Method = __Motor_DM_Control_Method;
-    Encoder_Offset = __Encoder_Offset;
-    Current_Max = __Current_Max;
-    Tx_Data = allocate_tx_data(hcan, __CAN_Rx_ID);
+    can_rx_id_ = can_rx_id;
+    motor_dm_control_method_ = motor_dm_control_method;
+    encoder_offset_ = encoder_offset;
+    current_max_ = current_max;
+    tx_data_ = allocate_tx_data(hcan, can_rx_id);
 }
 
 /**
  * @brief CAN通信接收回调函数
  *
- * @param Rx_Data 接收的数据
+ * @param rx_data_ 接收的数据
  */
-void Class_Motor_DM_1_To_4::CAN_RxCpltCallback(uint8_t *Rx_Data)
+void MotorDm1To4::CanRxCpltCallback(uint8_t *rx_data_)
 {
     // 滑动窗口, 判断电机是否在线
-    Flag += 1;
+    flag_ += 1;
 
-    Data_Process();
+    DataProcess();
 }
 
 /**
  * @brief TIM定时器中断定期检测电机是否存活
  *
  */
-void Class_Motor_DM_1_To_4::TIM_100ms_Alive_PeriodElapsedCallback()
+void MotorDm1To4::AlivePeriodElapsedCallback()
 {
     // 判断该时间段内是否接收过电机数据
-    if (Flag == Pre_Flag)
+    if (flag_ == pre_flag_)
     {
         // 电机断开连接
-        Motor_DM_Status = Motor_DM_Status_DISABLE;
-        PID_Angle.Set_Integral_Error(0.0f);
-        PID_Omega.Set_Integral_Error(0.0f);
+        motor_dm_status_ = MOTOR_DM_STATUS_DISABLE;
+        pid_angle_.SetIntegralError(0.0f);
+        pid_omega_.SetIntegralError(0.0f);
     }
     else
     {
         // 电机保持连接
-        Motor_DM_Status = Motor_DM_Status_ENABLE;
+        motor_dm_status_ = MOTOR_DM_STATUS_ENABLE;
     }
-    Pre_Flag = Flag;
+    pre_flag_ = flag_;
 }
 
 /**
  * @brief TIM定时器中断计算回调函数, 计算周期取决于电机反馈周期
  *
  */
-void Class_Motor_DM_1_To_4::TIM_1ms_Calculate_PeriodElapsedCallback()
+void MotorDm1To4::CalculatePeriodElapsedCallback()
 {
-    PID_Calculate();
+    PidCalculate();
 
-    float tmp_value = Target_Current + Feedforward_Current;
-    Math_Constrain(&tmp_value, -Current_Max, Current_Max);
-    Out = tmp_value * Current_To_Out;
+    float tmp_value = target_current_ + feedforward_current_;
+    math_constrain(&tmp_value, -current_max_, current_max_);
+    out_ = tmp_value * current_to_out_;
 
     Output();
 
-    Feedforward_Current = 0.0f;
-    Feedforward_Omega = 0.0f;
+    feedforward_current_ = 0.0f;
+    feedforward_omega_ = 0.0f;
 }
 
 /**
  * @brief 数据处理过程
  *
  */
-void Class_Motor_DM_1_To_4::Data_Process()
+void MotorDm1To4::DataProcess()
 {
     // 数据处理过程
     int16_t delta_encoder;
     uint16_t tmp_encoder;
     int16_t tmp_omega, tmp_current;
-    Struct_Motor_DM_CAN_Rx_Data_1_To_4 *tmp_buffer = (Struct_Motor_DM_CAN_Rx_Data_1_To_4 *) CAN_Manage_Object->Rx_Buffer.Data;
+    MotorDmCanRxData1To4 *tmp_buffer = (MotorDmCanRxData1To4 *) can_manage_object_->rx_buffer.data;
 
     // 处理大小端
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Encoder_Reverse, (void *) &tmp_encoder);
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Omega_Reverse, (void *) &tmp_omega);
-    Math_Endian_Reverse_16((void *) &tmp_buffer->Current_Reverse, (void *) &tmp_current);
+    math_endian_reverse_16((void *) &tmp_buffer->encoder_reverse, (void *) &tmp_encoder);
+    math_endian_reverse_16((void *) &tmp_buffer->omega_reverse, (void *) &tmp_omega);
+    math_endian_reverse_16((void *) &tmp_buffer->current_reverse, (void *) &tmp_current);
 
     // 计算圈数与总编码器值
-    delta_encoder = tmp_encoder - Rx_Data.Pre_Encoder;
-    if (delta_encoder < -Encoder_Num_Per_Round / 2)
+    delta_encoder = tmp_encoder - rx_data_.pre_encoder;
+    if (delta_encoder < -encoder_num_per_round_ / 2)
     {
         // 正方向转过了一圈
-        Rx_Data.Total_Round++;
+        rx_data_.total_round++;
     }
-    else if (delta_encoder > Encoder_Num_Per_Round / 2)
+    else if (delta_encoder > encoder_num_per_round_ / 2)
     {
         // 反方向转过了一圈
-        Rx_Data.Total_Round--;
+        rx_data_.total_round--;
     }
-    Rx_Data.Total_Encoder = Rx_Data.Total_Round * Encoder_Num_Per_Round + tmp_encoder + Encoder_Offset;
+    rx_data_.total_encoder = rx_data_.total_round * encoder_num_per_round_ + tmp_encoder + encoder_offset_;
 
     // 计算电机本身信息
-    Rx_Data.Now_Angle = (float) Rx_Data.Total_Encoder / (float) Encoder_Num_Per_Round * 2.0f * PI;
-    Rx_Data.Now_Omega = tmp_omega / 100.0f * RPM_TO_RADPS;
-    Rx_Data.Now_Current = tmp_current / 1000.0f;
-    Rx_Data.Now_MOS_Temperature = tmp_buffer->MOS_Temperature + CELSIUS_TO_KELVIN;
-    Rx_Data.Now_Rotor_Temperature = tmp_buffer->Rotor_Temperature + CELSIUS_TO_KELVIN;
+    rx_data_.now_angle = (float) rx_data_.total_encoder / (float) encoder_num_per_round_ * 2.0f * PI;
+    rx_data_.now_omega = tmp_omega / 100.0f * RPM_TO_RADPS;
+    rx_data_.Now_Current = tmp_current / 1000.0f;
+    rx_data_.now_mos_temperature = tmp_buffer->mos_temperature + CELSIUS_TO_KELVIN;
+    rx_data_.now_rotor_temperature = tmp_buffer->rotor_temperature + CELSIUS_TO_KELVIN;
 
     // 存储预备信息
-    Rx_Data.Pre_Encoder = tmp_encoder;
+    rx_data_.pre_encoder = tmp_encoder;
 }
 
 /**
  * @brief 计算PID
  *
  */
-void Class_Motor_DM_1_To_4::PID_Calculate()
+void MotorDm1To4::PidCalculate()
 {
-    switch (Motor_DM_Control_Method)
+    switch (motor_dm_control_method_)
     {
-    case (Motor_DM_Control_Method_1_TO_4_CURRENT):
+    case (MOTOR_DM_CONTROL_METHOD_1_TO_4_CURRENT):
     {
         break;
     }
-    case (Motor_DM_Control_Method_1_TO_4_OMEGA):
+    case (MOTOR_DM_CONTROL_METHOD_1_TO_4_OMEGA):
     {
-        PID_Omega.Set_Target(Target_Omega + Feedforward_Omega);
-        PID_Omega.Set_Now(Rx_Data.Now_Omega);
-        PID_Omega.Calculate_PeriodElapsedCallback();
+        pid_omega_.SetTarget(target_omega_ + feedforward_omega_);
+        pid_omega_.SetNow(rx_data_.now_omega);
+        pid_omega_.CalculatePeriodElapsedCallback();
 
-        Target_Current = PID_Omega.Get_Out();
+        target_current_ = pid_omega_.GetOut();
 
         break;
     }
-    case (Motor_DM_Control_Method_1_TO_4_ANGLE):
+    case (MOTOR_DM_CONTROL_METHOD_1_TO_4_ANGLE):
     {
-        PID_Angle.Set_Target(Target_Angle);
-        PID_Angle.Set_Now(Rx_Data.Now_Angle);
-        PID_Angle.Calculate_PeriodElapsedCallback();
+        pid_angle_.SetTarget(target_angle_);
+        pid_angle_.SetNow(rx_data_.now_angle);
+        pid_angle_.CalculatePeriodElapsedCallback();
 
-        Target_Omega = PID_Angle.Get_Out();
+        target_omega_ = pid_angle_.GetOut();
 
-        PID_Omega.Set_Target(Target_Omega + Feedforward_Omega);
-        PID_Omega.Set_Now(Rx_Data.Now_Omega);
-        PID_Omega.Calculate_PeriodElapsedCallback();
+        pid_omega_.SetTarget(target_omega_ + feedforward_omega_);
+        pid_omega_.SetNow(rx_data_.now_omega);
+        pid_omega_.CalculatePeriodElapsedCallback();
 
-        Target_Current = PID_Omega.Get_Out();
+        target_current_ = pid_omega_.GetOut();
 
         break;
     }
     default:
     {
-        Target_Current = 0.0f;
+        target_current_ = 0.0f;
 
         break;
     }
@@ -641,9 +646,9 @@ void Class_Motor_DM_1_To_4::PID_Calculate()
  * @brief 电机数据输出到CAN总线发送缓冲区
  *
  */
-void Class_Motor_DM_1_To_4::Output()
+void MotorDm1To4::Output()
 {
-    *(int16_t *) Tx_Data = (int16_t)(Out);
+    *(int16_t *) tx_data_ = (int16_t)(out_);
 }
 
-/************************ COPYRIGHT(C) USTC-ROBOWALKER **************************/
+/************************ COPYRIGHT(C) HNUST_DUST **************************/

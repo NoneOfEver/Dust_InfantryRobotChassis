@@ -1,5 +1,15 @@
-#ifndef _BSP_LOG_H
-#define _BSP_LOG_H
+/**
+ * @file bsp_log.h
+ * @author noe (noneofever@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-08-03
+ * 
+ * @copyright Copyright (c) 2025
+ * 
+ */
+#ifndef BSP_BSP_LOG_H
+#define BSP_BSP_LOG_H
 
 #include "SEGGER_RTT.h"
 #include "SEGGER_RTT_Conf.h"
@@ -11,7 +21,7 @@
  * @brief 日志系统初始化
  * 
  */
-void BSPLogInit();
+void log_init();
 
 /**
  * @brief 日志功能原型,供下面的LOGI,LOGW,LOGE等使用
@@ -58,7 +68,7 @@ void BSPLogInit();
  * @param ... 参数列表
  * @return int 打印的log字符数
  */
-int PrintLog(const char *fmt, ...);
+int print_log(const char *fmt, ...);
 
 /**
  * @brief 利用sprintf(),将float转换为字符串进行打印
@@ -67,6 +77,6 @@ int PrintLog(const char *fmt, ...);
  * @param str 转换后的字符串
  * @param va 待转换的float
  */
-void Float2Str(char *str, float va);
+void float2str(char *str, float va);
 
 #endif

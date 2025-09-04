@@ -1,29 +1,26 @@
 /**
- ******************************************************************************
- * @file	bsp_dwt.h
- * @author  Wang Hongxi
- * @author  modified by NeoZng
- * @version V1.2.0
- * @date    2022/3/8
- * @brief
- ******************************************************************************
- * @attention
- *
- ******************************************************************************
+ * @file bsp_dwt.h
+ * @author noe (noneofever@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2025-08-02
+ * 
+ * @copyright Copyright (c) 2025
+ * 
  */
-#ifndef _BSP_DWT_H
-#define _BSP_DWT_H
+#ifndef BSP_BSP_DWT_H_
+#define BSP_BSP_DWT_H_
 
 #include "main.h"
 #include "stdint.h"
 #include "bsp_log.h"
 
-typedef struct
+struct DwtTime
 {
     uint32_t s;
     uint16_t ms;
     uint16_t us;
-} DWT_Time_t;
+};
 
 /**
  * @brief 该宏用于计算代码段执行时间,单位为秒/s,返回值为float类型
@@ -33,18 +30,18 @@ typedef struct
 #define TIME_ELAPSE(dt, code)                    \
     do                                           \
     {                                            \
-        float tstart = DWT_GetTimeline_s();      \
+        float tstart = dwt_get_timeline_s();      \
         code;                                    \
-        dt = DWT_GetTimeline_s() - tstart;       \
+        dt = dwt_get_timeline_s() - tstart;       \
         LOGINFO("[DWT] " #dt " = %f s\r\n", dt); \
     } while (0)
 
 /**
  * @brief 初始化DWT,传入参数为CPU频率,单位MHz
  *
- * @param CPU_Freq_mHz c板为168MHz,A板为180MHz
+ * @param cpu_frequncy_mhz c板为168MHz,A板为180MHz
  */
-void DWT_Init(uint32_t CPU_Freq_mHz);
+void dwt_init(uint32_t cpu_frequncy_mhz);
 
 /**
  * @brief 获取两次调用之间的时间间隔,单位为秒/s
@@ -52,7 +49,7 @@ void DWT_Init(uint32_t CPU_Freq_mHz);
  * @param cnt_last 上一次调用的时间戳
  * @return float 时间间隔,单位为秒/s
  */
-float DWT_GetDeltaT(uint32_t *cnt_last);
+float dwt_get_delta_t(uint32_t *cnt_last);
 
 /**
  * @brief 获取两次调用之间的时间间隔,单位为秒/s,高精度
@@ -60,28 +57,28 @@ float DWT_GetDeltaT(uint32_t *cnt_last);
  * @param cnt_last 上一次调用的时间戳
  * @return double 时间间隔,单位为秒/s
  */
-double DWT_GetDeltaT64(uint32_t *cnt_last);
+double dwt_get_delta_t_64(uint32_t *cnt_last);
 
 /**
  * @brief 获取当前时间,单位为秒/s,即初始化后的时间
  *
  * @return float 时间轴
  */
-float DWT_GetTimeline_s(void);
+float dwt_get_timeline_s(void);
 
 /**
  * @brief 获取当前时间,单位为毫秒/ms,即初始化后的时间
  *
  * @return float
  */
-float DWT_GetTimeline_ms(void);
+float dwt_get_timeline_ms(void);
 
 /**
  * @brief 获取当前时间,单位为微秒/us,即初始化后的时间
  *
  * @return uint64_t
  */
-uint64_t DWT_GetTimeline_us(void);
+uint64_t dwt_get_timeline_us(void);
 
 /**
  * @brief DWT延时函数,单位为秒/s
@@ -90,12 +87,13 @@ uint64_t DWT_GetTimeline_us(void);
  *
  * @param Delay 延时时间,单位为秒/s
  */
-void DWT_Delay(float Delay);
+void dwt_delay(float delay);
 
 /**
  * @brief DWT更新时间轴函数,会被三个timeline函数调用
  * @attention 如果长时间不调用timeline函数,则需要手动调用该函数更新时间轴,否则CYCCNT溢出后定时和时间轴不准确
  */
-void DWT_SysTimeUpdate(void);
+void dwt_systime_update(void);
 
-#endif /* BSP_DWT_H_ */
+#endif /* BSP_BSP_DWT_H_ */
+/************************ COPYRIGHT(C) HNUST-DUST **************************/

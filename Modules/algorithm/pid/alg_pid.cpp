@@ -1,6 +1,6 @@
 /* Includes ------------------------------------------------------------------*/
 
-#include "alg_pid.hpp"
+#include "alg_pid.h"
 
 /* Private macros ------------------------------------------------------------*/
 
@@ -15,28 +15,40 @@
 /**
  * @brief PID初始化
  *
- * @param __K_P P值
- * @param __K_I I值
- * @param __K_D D值
- * @param __K_F 前馈
- * @param __I_Out_Max 积分限幅
- * @param __Out_Max 输出限幅
- * @param __D_T 时间片长度
+ * @param k_p P值
+ * @param k_i I值
+ * @param k_d D值
+ * @param k_f 前馈
+ * @param i_out_max 积分限幅
+ * @param out_max 输出限幅
+ * @param d_t 时间片长度
  */
-void Class_PID::Init(float __K_P, float __K_I, float __K_D, float __K_F, float __I_Out_Max, float __Out_Max, float __D_T, float __Dead_Zone, float __I_Variable_Speed_A, float __I_Variable_Speed_B, float __I_Separate_Threshold, Enum_PID_D_First __D_First)
+void Pid::Init(
+    float k_p, 
+    float k_i, 
+    float k_d, 
+    float k_f, 
+    float i_out_max, 
+    float out_max, 
+    float d_t, 
+    float dead_zone, 
+    float i_variable_speed_A, 
+    float i_variable_speed_B, 
+    float i_separate_threshold, 
+    enum DFirst d_first)
 {
-    K_P = __K_P;
-    K_I = __K_I;
-    K_D = __K_D;
-    K_F = __K_F;
-    I_Out_Max = __I_Out_Max;
-    Out_Max = __Out_Max;
-    D_T = __D_T;
-    Dead_Zone = __Dead_Zone;
-    I_Variable_Speed_A = __I_Variable_Speed_A;
-    I_Variable_Speed_B = __I_Variable_Speed_B;
-    I_Separate_Threshold = __I_Separate_Threshold;
-    D_First = __D_First;
+    k_p_ = k_p;
+    k_i_ = k_i;
+    k_d_ = k_d;
+    k_f_ = k_f;
+    i_out_max_ = i_out_max;
+    out_max_ = out_max;
+    d_t_ = d_t;
+    dead_zone_ = dead_zone;
+    i_variable_speed_A_ = i_variable_speed_A;
+    i_variable_speed_B_ = i_variable_speed_B;
+    i_separate_threshold_ = i_separate_threshold;
+    d_first_ = d_first;
 }
 
 /**
@@ -44,9 +56,9 @@ void Class_PID::Init(float __K_P, float __K_I, float __K_D, float __K_F, float _
  *
  * @return float 输出值
  */
-float Class_PID::Get_Integral_Error()
+float Pid::GetIntegralError()
 {
-    return (Integral_Error);
+    return (integral_error_);
 }
 
 /**
@@ -54,137 +66,137 @@ float Class_PID::Get_Integral_Error()
  *
  * @return float 输出值
  */
-float Class_PID::Get_Out()
+float Pid::GetOut()
 {
-    return (Out);
+    return (out_);
 }
 
 /**
  * @brief 设定PID的P
  *
- * @param __K_P PID的P
+ * @param k_p_ PID的P
  */
-void Class_PID::Set_K_P(float __K_P)
+void Pid::SetKp(float k_p)
 {
-    K_P = __K_P;
+    k_p_ = k_p;
 }
 
 /**
  * @brief 设定PID的I
  *
- * @param __K_I PID的I
+ * @param k_i PID的I
  */
-void Class_PID::Set_K_I(float __K_I)
+void Pid::SetKi(float k_i)
 {
-    K_I = __K_I;
+    k_i_ = k_i;
 }
 
 /**
  * @brief 设定PID的D
  *
- * @param __K_D PID的D
+ * @param k_d PID的D
  */
-void Class_PID::Set_K_D(float __K_D)
+void Pid::SetKd(float k_d)
 {
-    K_D = __K_D;
+    k_d_ = k_d;
 }
 
 /**
  * @brief 设定前馈
  *
- * @param __K_D 前馈
+ * @param k_d 前馈
  */
-void Class_PID::Set_K_F(float __K_F)
+void Pid::SetKf(float k_f)
 {
-    K_F = __K_F;
+    k_f_ = k_f;
 }
 
 /**
  * @brief 设定积分限幅, 0为不限制
  *
- * @param __I_Out_Max 积分限幅, 0为不限制
+ * @param i_out_max 积分限幅, 0为不限制
  */
-void Class_PID::Set_I_Out_Max(float __I_Out_Max)
+void Pid::SetIOutMax(float i_out_max)
 {
-    I_Out_Max = __I_Out_Max;
+    i_out_max_ = i_out_max;
 }
 
 /**
  * @brief 设定输出限幅, 0为不限制
  *
- * @param __Out_Max 输出限幅, 0为不限制
+ * @param out_max 输出限幅, 0为不限制
  */
-void Class_PID::Set_Out_Max(float __Out_Max)
+void Pid::SetOutMax(float out_max)
 {
-    Out_Max = __Out_Max;
+    out_max_ = out_max;
 }
 
 /**
  * @brief 设定定速内段阈值, 0为不限制
  *
- * @param __I_Variable_Speed_A 定速内段阈值, 0为不限制
+ * @param i_variable_speed_A 定速内段阈值, 0为不限制
  */
-void Class_PID::Set_I_Variable_Speed_A(float __I_Variable_Speed_A)
+void Pid::SetIVariableSpeedA(float i_variable_speed_A)
 {
-    I_Variable_Speed_A = __I_Variable_Speed_A;
+    i_variable_speed_A_ = i_variable_speed_A;
 }
 
 /**
  * @brief 设定变速区间, 0为不限制
  *
- * @param __I_Variable_Speed_B 变速区间, 0为不限制
+ * @param i_variable_speed_B 变速区间, 0为不限制
  */
-void Class_PID::Set_I_Variable_Speed_B(float __I_Variable_Speed_B)
+void Pid::SetIVariableSpeedB(float i_variable_speed_B)
 {
-    I_Variable_Speed_B = __I_Variable_Speed_B;
+    i_variable_speed_B_ = i_variable_speed_B;
 }
 
 /**
  * @brief 设定积分分离阈值，需为正数, 0为不限制
  *
- * @param __I_Separate_Threshold 积分分离阈值，需为正数, 0为不限制
+ * @param i_separate_threshold 积分分离阈值，需为正数, 0为不限制
  */
-void Class_PID::Set_I_Separate_Threshold(float __I_Separate_Threshold)
+void Pid::SetISeparateThreshold(float i_separate_threshold)
 {
-    I_Separate_Threshold = __I_Separate_Threshold;
+    i_separate_threshold_ = i_separate_threshold;
 }
 
 /**
  * @brief 设定目标值
  *
- * @param __Target 目标值
+ * @param target 目标值
  */
-void Class_PID::Set_Target(float __Target)
+void Pid::SetTarget(float target)
 {
-    Target = __Target;
+    target_ = target;
 }
 
 /**
  * @brief 设定当前值
  *
- * @param __Now 当前值
+ * @param now 当前值
  */
-void Class_PID::Set_Now(float __Now)
+void Pid::SetNow(float now)
 {
-    Now = __Now;
+    now_ = now;
 }
 
 /**
  * @brief 设定积分, 一般用于积分清零
  *
- * @param __Set_Integral_Error 积分值
+ * @param integral_error 积分值
  */
-void Class_PID::Set_Integral_Error(float __Integral_Error)
+void Pid::SetIntegralError(float integral_error)
 {
-    Integral_Error = __Integral_Error;
+    integral_error_ = integral_error;
 }
 
 /**
- * @brief PID调整值, 计算周期与D_T相同
+ * @brief PID调整值, 计算周期与d_t_相同
  *
  * @return float 输出值
  */
-void Class_PID::Calculate_PeriodElapsedCallback()
+void Pid::CalculatePeriodElapsedCallback()
 {
     // P输出
     float p_out = 0.0f;
@@ -201,32 +213,32 @@ void Class_PID::Calculate_PeriodElapsedCallback()
     // 线性变速积分
     float speed_ratio;
 
-    error = Target - Now;
-    abs_error = Math_Abs(error);
+    error = target_ - now_;
+    abs_error = math_abs(error);
 
     // 判断死区
-    if (abs_error < Dead_Zone)
+    if (abs_error < dead_zone_)
     {
-        Target = Now;
+        target_ = now_;
         error = 0.0f;
         abs_error = 0.0f;
     }
-    else if (error > 0.0f && abs_error > Dead_Zone)
+    else if (error > 0.0f && abs_error > dead_zone_)
     {
-        error -= Dead_Zone;
+        error -= dead_zone_;
     }
-    else if (error < 0.0f && abs_error > Dead_Zone)
+    else if (error < 0.0f && abs_error > dead_zone_)
     {
-        error += Dead_Zone;
+        error += dead_zone_;
     }
 
     // 计算p项
 
-    p_out = K_P * error;
+    p_out = k_p_ * error;
 
     // 计算i项
 
-    if (I_Variable_Speed_A == 0.0f && I_Variable_Speed_B == 0.0f)
+    if (i_variable_speed_A_ == 0.0f && i_variable_speed_B_ == 0.0f)
     {
         // 非变速积分
         speed_ratio = 1.0f;
@@ -234,80 +246,80 @@ void Class_PID::Calculate_PeriodElapsedCallback()
     else
     {
         // 变速积分
-        if (abs_error <= I_Variable_Speed_A)
+        if (abs_error <= i_variable_speed_A_)
         {
             speed_ratio = 1.0f;
         }
-        else if (I_Variable_Speed_A < abs_error && abs_error < I_Variable_Speed_B)
+        else if (i_variable_speed_A_ < abs_error && abs_error < i_variable_speed_B_)
         {
-            speed_ratio = (I_Variable_Speed_B - abs_error) / (I_Variable_Speed_B - I_Variable_Speed_A);
+            speed_ratio = (i_variable_speed_B_ - abs_error) / (i_variable_speed_B_ - i_variable_speed_A_);
         }
-        else if (abs_error >= I_Variable_Speed_B)
+        else if (abs_error >= i_variable_speed_B_)
         {
             speed_ratio = 0.0f;
         }
     }
     // 积分限幅
-    if (I_Out_Max != 0.0f)
+    if (i_out_max_ != 0.0f)
     {
-        Math_Constrain(&Integral_Error, -I_Out_Max / K_I, I_Out_Max / K_I);
+        math_constrain(&integral_error_, -i_out_max_ / k_i_, i_out_max_ / k_i_);
     }
-    if (I_Separate_Threshold == 0.0f)
+    if (i_separate_threshold_ == 0.0f)
     {
         // 没有积分分离
-        Integral_Error += speed_ratio * D_T * error;
-        i_out = K_I * Integral_Error;
+        integral_error_ += speed_ratio * d_t_ * error;
+        i_out = k_i_ * integral_error_;
     }
     else
     {
         // 有积分分离
-        if (abs_error < I_Separate_Threshold)
+        if (abs_error < i_separate_threshold_)
         {
             // 不在积分分离区间上
-            Integral_Error += speed_ratio * D_T * error;
-            i_out = K_I * Integral_Error;
+            integral_error_ += speed_ratio * d_t_ * error;
+            i_out = k_i_ * integral_error_;
         }
         else
         {
             // 在积分分离区间上
-            Integral_Error = 0.0f;
+            integral_error_ = 0.0f;
             i_out = 0.0f;
         }
     }
 
     // 计算d项
 
-    if (D_First == PID_D_First_DISABLE)
+    if (d_first_ == PID_D_First_DISABLE)
     {
         // 没有微分先行
-        d_out = K_D * (error - Pre_Error) / D_T;
+        d_out = k_d_ * (error - pre_error_) / d_t_;
     }
     else
     {
         // 微分先行使能
-        d_out = -K_D * (Now - Pre_Now) / D_T;
+        d_out = -k_d_ * (now_ - pre_now_) / d_t_;
     }
 
     // 计算前馈
 
-    f_out = K_F * (Target - Pre_Target);
+    f_out = k_f_ * (target_ - pre_target_);
 
     // 计算输出
     // 积分项计算存在内存问题，暂时关闭积分项！！注意！！
     //Out = p_out + i_out + d_out + f_out;
-    Out = p_out + d_out + f_out;
+    out_ = p_out + d_out + f_out;
 
     // 输出限幅
-    if (Out_Max != 0.0f)
+    if (out_max_ != 0.0f)
     {
-        Math_Constrain(&Out, -Out_Max, Out_Max);
+        math_constrain(&out_, -out_max_, out_max_);
     }
 
     // 善后工作
-    Pre_Now = Now;
-    Pre_Target = Target;
-    Pre_Out = Out;
-    Pre_Error = error;
+    pre_now_ = now_;
+    pre_target_ = target_;
+    pre_out_ = out_;
+    pre_error_ = error;
 }
 
 /************************ COPYRIGHT(C) HNUST-DUST **************************/
