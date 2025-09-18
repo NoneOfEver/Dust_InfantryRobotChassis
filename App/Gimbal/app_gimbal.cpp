@@ -70,16 +70,16 @@ void Class_Gimbal::Self_Resolution()
 void Class_Gimbal::Output()
 {
 
-    // 云台位控
-    if (Gimbal_Control_Type == Gimbal_Control_Type_Manual)         // 无自瞄介入
-    {
-        // do nothing
-    }else if (Gimbal_Control_Type == Gimbal_Control_Type_AutoAim){ // 有自瞄矫正
-        _Motor_Nearest_Transposition();
-        Yaw_Angle_PID.Set_Target(Now_Yaw_Angle); // 加视觉的相对偏移量
-        Yaw_Angle_PID.Calculate_PeriodElapsedCallback();
-        Target_Yaw_Omega = Yaw_Angle_PID.Get_Out();
-    }
+    // // 云台位控
+    // if (Gimbal_Control_Type == Gimbal_Control_Type_Manual)         // 无自瞄介入
+    // {
+    //     // do nothing
+    // }else if (Gimbal_Control_Type == Gimbal_Control_Type_AutoAim){ // 有自瞄矫正
+    //     _Motor_Nearest_Transposition();
+    //     Yaw_Angle_PID.Set_Target(Now_Yaw_Angle); // 加视觉的相对偏移量
+    //     Yaw_Angle_PID.Calculate_PeriodElapsedCallback();
+    //     Target_Yaw_Omega = Yaw_Angle_PID.Get_Out();
+    // }
 
 
     Motor_Yaw.Set_Control_Omega(Target_Yaw_Omega);
@@ -126,7 +126,7 @@ void Class_Gimbal::Task()
 {
     for (;;)
     {
-        Self_Resolution();
+        // Self_Resolution();
         Output();
         osDelay(pdMS_TO_TICKS(1));
     }

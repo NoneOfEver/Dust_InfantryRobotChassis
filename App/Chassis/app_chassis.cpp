@@ -61,4 +61,3 @@ void Class_Chassis::Task()
         osDelay(pdMS_TO_TICKS(10));
     }
 }
-
