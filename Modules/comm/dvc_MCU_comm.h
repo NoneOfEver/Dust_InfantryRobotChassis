@@ -15,17 +15,22 @@
 #include "cmsis_os2.h"
 
 
+enum ChassisSpinMode{
+    CHASSIS_SPIN_CLOCKWISE          = 0,
+    CHASSIS_SPIN_DISABLE            = 1,
+    CHASSIS_SPIN_COUNTER_CLOCK_WISE = 2,
+};
 
 struct McuCommData
 {
-    uint8_t start_of_frame;     // 帧头
-    uint8_t yaw;                // yaw
-    uint8_t pitch_angle;        // 俯仰角度
-    uint8_t chassis_speed_x;    // 平移方向：前、后、左、右
-    uint8_t chassis_speed_y;    // 底盘移动总速度
-    uint8_t chassis_rotation;   // 自转：不转、顺时针转、逆时针转
-    uint8_t chassis_spin;       // 小陀螺：不转、顺时针转、逆时针转
-    uint8_t booster;            // 发射机构：准备、发射
+    uint8_t         start_of_frame;     // 帧头
+    uint8_t         yaw;                // yaw
+    uint8_t         pitch_angle;        // 俯仰角度
+    uint8_t         chassis_speed_x;    // 平移方向：前、后、左、右
+    uint8_t         chassis_speed_y;    // 底盘移动总速度
+    uint8_t         chassis_rotation;   // 自转：不转、顺时针转、逆时针转
+    ChassisSpinMode chassis_spin;       // 小陀螺：不转、顺时针转、逆时针转
+    uint8_t         booster;            // 发射机构：准备、发射
 };
 
 struct McuSendData

@@ -95,7 +95,21 @@ void McuComm::CanRxCpltCallback(uint8_t* rx_data)
                mcu_comm_data_.chassis_speed_x      = rx_data[3];
                mcu_comm_data_.chassis_speed_y      = rx_data[4];
                mcu_comm_data_.chassis_rotation     = rx_data[5];
-               mcu_comm_data_.chassis_spin         = rx_data[6];
+               switch(rx_data[6])
+               {
+                    case 0:
+                    mcu_comm_data_.chassis_spin = CHASSIS_SPIN_CLOCKWISE;
+                    break;
+                    case 1:
+                    mcu_comm_data_.chassis_spin = CHASSIS_SPIN_DISABLE;
+                    break;
+                    case 2:
+                    mcu_comm_data_.chassis_spin = CHASSIS_SPIN_COUNTER_CLOCK_WISE;
+                    break;
+                    default:
+                    mcu_comm_data_.chassis_spin = CHASSIS_SPIN_DISABLE;
+                    break;
+               }
                mcu_comm_data_.booster              = rx_data[7];
                break;
 

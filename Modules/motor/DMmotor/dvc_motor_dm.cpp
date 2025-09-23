@@ -19,25 +19,25 @@
 /* Private variables ---------------------------------------------------------*/
 
 // 清除电机错误信息, 传统模式有效
-uint8_t kDmMotorCanMessageClearError[8] = {0xff,
-                                                 0xff,
-                                                 0xff,
-                                                 0xff,
-                                                 0xff,
-                                                 0xff,
-                                                 0xff,
-                                                 0xfb};
+uint8_t kDmMotorCanMessageClearError[8] = { 0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xfb};
 // 使能电机, 传统模式有效
-uint8_t kDmMotorCANMessageEnter[8] = {0xff,
-                                         0xff,
-                                         0xff,
-                                         0xff,
-                                         0xff,
-                                         0xff,
-                                         0xff,
-                                         0xfc};
+uint8_t kDmMotorCANMessageEnter[8] = {  0xff,
+                                        0xff,
+                                        0xff,
+                                        0xff,
+                                        0xff,
+                                        0xff,
+                                        0xff,
+                                        0xfc};
 // 失能电机, 传统模式有效
-uint8_t kDmMotorCanMessageExit[8] = {0xff,
+uint8_t kDmMotorCanMessageExit[8] = {   0xff,
                                         0xff,
                                         0xff,
                                         0xff,
@@ -46,14 +46,14 @@ uint8_t kDmMotorCanMessageExit[8] = {0xff,
                                         0xff,
                                         0xfd};
 // 保存当前电机位置为零点, 传统模式有效
-uint8_t kDmMotorCANMessageSaveZero[8] = {0xff,
-                                             0xff,
-                                             0xff,
-                                             0xff,
-                                             0xff,
-                                             0xff,
-                                             0xff,
-                                             0xfe};
+uint8_t kDmMotorCANMessageSaveZero[8] = {   0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xff,
+                                            0xfe};
 
 /* Private function declarations ---------------------------------------------*/
 
@@ -587,7 +587,7 @@ void MotorDm1To4::DataProcess()
     // 计算电机本身信息
     rx_data_.now_angle = (float) rx_data_.total_encoder / (float) encoder_num_per_round_ * 2.0f * PI;
     rx_data_.now_omega = tmp_omega / 100.0f * RPM_TO_RADPS;
-    rx_data_.Now_Current = tmp_current / 1000.0f;
+    rx_data_.now_current = tmp_current / 1000.0f;
     rx_data_.now_mos_temperature = tmp_buffer->mos_temperature + CELSIUS_TO_KELVIN;
     rx_data_.now_rotor_temperature = tmp_buffer->rotor_temperature + CELSIUS_TO_KELVIN;
 

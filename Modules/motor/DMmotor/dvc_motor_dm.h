@@ -181,7 +181,7 @@ struct MotorDmRxData1to4
 {
     float now_angle;
     float now_omega;
-    float Now_Current;
+    float now_current;
     float now_mos_temperature;
     float now_rotor_temperature;
     uint32_t pre_encoder;
@@ -771,7 +771,7 @@ inline float MotorDm1To4::GetNowOmega()
  */
 inline float MotorDm1To4::GetNowCurrent()
 {
-    return (rx_data_.Now_Current);
+    return (rx_data_.now_current);
 }
 
 /**
