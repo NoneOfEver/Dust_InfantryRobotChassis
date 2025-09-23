@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Flash STM32",
+            "type": "shell",
+            "command": "openocd",
+            "args": [
+                "-f", "${workspaceRoot}/config/openocd_dap.cfg",
+                "-c", "program build/Dust_InfantryRobotChassis.bin verify reset exit 0x08000000"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "clang-tidy full scan",
+            "type": "shell",
+            "command": "run-clang-tidy",
+            "args": [
+                "-p",
+                "build",
+                "App/**/*.cpp",
+                "Bsp/**/*.cpp",
+                "Modules/**/*.cpp"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}

@@ -26,7 +26,6 @@ void Chassis::Init()
     };
     // 启动任务，将 this 传入
     osThreadNew(Chassis::TaskEntry, this, &kChassisTaskAttr);
-
 }
 // 任务入口（静态函数）—— osThreadNew 需要这个原型
 void Chassis::TaskEntry(void *argument)

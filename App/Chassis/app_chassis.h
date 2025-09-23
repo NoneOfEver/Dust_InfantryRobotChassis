@@ -21,6 +21,7 @@
 #include "bsp_usart.h"
 #include "bsp_can.h"
 
+
 class Chassis
 {
 public:
@@ -42,6 +43,7 @@ protected:
     float target_velocity_y_ = 0.0f;
     // 目标速度 旋转
     float target_velocity_rotation_ = 0.0f;
+
     void KinematicsInverseResolution();
     void OutputToMotor();
     static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数

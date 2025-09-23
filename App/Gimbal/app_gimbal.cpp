@@ -16,7 +16,7 @@ void Gimbal::Init()
     motor_yaw_.Init(&hfdcan3, 0x12, 0x01);
     motor_pitch_.Init(&hfdcan3, 0x11, 0x02);
 
-    yaw_angle_pid_.Init(1,0,0,0,0,3.14f);
+    //yaw_angle_pid_.Init(1,0,0,0,0,3.14f);
 
     motor_yaw_.CanSendClearError();
     HAL_Delay(1000);
@@ -64,9 +64,9 @@ void Gimbal::SelfResolution()
 {
     now_pitch_angle_ = motor_pitch_.GetNowAngle();
     now_yaw_angle_   = motor_yaw_.GetNowAngle();
-    yaw_angle_pid_.SetNow(now_yaw_angle_);
-    yaw_angle_pid_.CalculatePeriodElapsedCallback();
-    target_yaw_omega_ = yaw_angle_pid_.GetOut();
+    // yaw_angle_pid_.SetNow(now_yaw_angle_);
+    // yaw_angle_pid_.CalculatePeriodElapsedCallback();
+    // target_yaw_omega_ = yaw_angle_pid_.GetOut();
 
     // // pitch轴角度归化到±PI / 2之间
     // now_pitch_angle_ = Math_Modulus_Normalization(-motor_pitch_.GetNowAngle(), 2.0f * PI);
@@ -80,16 +80,16 @@ void Gimbal::SelfResolution()
 void Gimbal::Output()
 {
 
-    // 云台位控
-    if (gimbal_control_type_ == GIMBAL_CONTROL_TYPE_MANUAL)         // 无自瞄介入
-    {
-        // do nothing
-    }else if (gimbal_control_type_ == GIMBAL_CONTROL_TYPE_AUTOAIM){ // 有自瞄矫正
-        MotorNearestTransposition();
-        yaw_angle_pid_.SetTarget(now_yaw_angle_); // 加视觉的相对偏移量
-        yaw_angle_pid_.CalculatePeriodElapsedCallback();
-        target_yaw_omega_ = yaw_angle_pid_.GetOut();
-    }
+    // // 云台位控
+    // if (gimbal_control_type_ == GIMBAL_CONTROL_TYPE_MANUAL)         // 无自瞄介入
+    // {
+    //     // do nothing
+    // }else if (gimbal_control_type_ == GIMBAL_CONTROL_TYPE_AUTOAIM){ // 有自瞄矫正
+    //     MotorNearestTransposition();
+    //     yaw_angle_pid_.SetTarget(now_yaw_angle_); // 加视觉的相对偏移量
+    //     yaw_angle_pid_.CalculatePeriodElapsedCallback();
+    //     target_yaw_omega_ = yaw_angle_pid_.GetOut();
+    // }
 
 
     motor_yaw_.SetControlOmega(target_yaw_omega_);
