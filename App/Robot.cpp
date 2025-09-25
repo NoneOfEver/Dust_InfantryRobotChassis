@@ -69,7 +69,7 @@ void Robot::Task()
         chassis_.SetTargetVelocityX((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
         chassis_.SetTargetVelocityY((mcu_comm_data_local.chassis_speed_y - 127.0f) * 10.0f / 128.0f); //9
         chassis_.SetTargetVelocityRotation((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f);
-
+        
         // 遥控模式
         gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
         gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * 0.009375f);
@@ -79,7 +79,7 @@ void Robot::Task()
         // gimbal_.SetTargetPitchAngle(gimbal_.GetNowPitchAngle() + mcu_comm_.mcu_autoaim_data_.pitch_f);
         // memcpy(&mcu_comm_.mcu_auto_aim_data_.Yaw_f,mcu_comm_.mcu_auto_aim_data_.Yaw,sizeof(float));
         // Gimbal.Yaw_Angle_PID.Set_Target(Gimbal.Get_Now_Yaw_Angle() + mcu_comm_.mcu_auto_aim_data_.Yaw_f);
-
+ 
         // // 回传云台电机角度数据
         // mcu_comm_.mcu_send_data_.armor = 0x00;
         // mcu_comm_.mcu_send_data_.yaw = gimbal_.GetNowYawAngle();

@@ -55,7 +55,16 @@ class McuComm
 {
 public:
 
-    volatile McuCommData mcu_comm_data_;
+    volatile McuCommData mcu_comm_data_ = {
+            0xAB,
+            127,
+            127,
+            127,
+            127,
+            127,
+            CHASSIS_SPIN_DISABLE,
+            0,
+    };
     McuSendData mcu_send_data_;
 
     McuAutoaimData mcu_autoaim_data_ = {    0xAC,

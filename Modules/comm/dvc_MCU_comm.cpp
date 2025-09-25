@@ -112,7 +112,6 @@ void McuComm::CanRxCpltCallback(uint8_t* rx_data)
                }
                mcu_comm_data_.booster              = rx_data[7];
                break;
-
           case 0xAC: // 自瞄yaw包
                mcu_autoaim_data_.start_of_yaw_frame = rx_data[0];
                mcu_autoaim_data_.yaw[0]             = rx_data[1];
@@ -127,7 +126,6 @@ void McuComm::CanRxCpltCallback(uint8_t* rx_data)
                mcu_autoaim_data_.pitch[2]           = rx_data[3];
                mcu_autoaim_data_.pitch[3]           = rx_data[4];
                break;
-
           default:
                break;
      }
