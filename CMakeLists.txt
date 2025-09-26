@@ -52,43 +52,27 @@ else ()
 endif ()
 
 include_directories(
-        Core/Inc 
-        USB_DEVICE/App
-        USB_DEVICE/Target
-        Drivers/STM32H7xx_HAL_Driver/Inc 
-        Drivers/STM32H7xx_HAL_Driver/Inc/Legacy 
-        Middlewares/Third_Party/FreeRTOS/Source/include 
-        Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2 
-        Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F 
-        Middlewares/ST/STM32_USB_Device_Library/Core/Inc 
-        Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc 
-        Middlewares/ST/ARM/DSP/Inc
-        Drivers/CMSIS/Device/ST/STM32H7xx/Include 
-        Drivers/CMSIS/Include 
+        Board/dm-h723/Inc 
+        ThirdParty/STM32H7xx_HAL_Driver/Inc 
+        ThirdParty/STM32H7xx_HAL_Driver/Inc/Legacy 
+        ThirdParty/FreeRTOS/Source/include 
+        ThirdParty/FreeRTOS/Source/CMSIS_RTOS_V2 
+        ThirdParty/FreeRTOS/Source/portable/GCC/ARM_CM4F 
+        ThirdParty/STM32_USB_Device_Library/Core/Inc 
+        ThirdParty/STM32_USB_Device_Library/Class/CDC/Inc 
+        ThirdParty/ARM/DSP/Inc
+        ThirdParty/CMSIS/Device/ST/STM32H7xx/Include 
+        ThirdParty/CMSIS/Include 
 )
 
 include_directories(
-        App
-        App/Chassis
-        App/Gimbal
-        Modules
-        Modules/algorithm/math
-        Modules/algorithm/pid
-        Modules/comm
-        Modules/motor/DMmotor
-        Modules/motor/DJImotor
-        Bsp
-        Bsp/can
-        Bsp/gpio
-        Bsp/pwm
-        Bsp/sbus
-        Bsp/spi
-        Bsp/usart
-        Bsp/usb
-        Bsp/log
-        Bsp/dwt
-        Middlewares/Third_Party/SEGGER/Config
-        Middlewares/Third_Party/SEGGER/RTT
+        Interaction/
+        Algorithm/
+        MotorControl/
+        Communication/
+        Drivers/
+        ThirdParty/SEGGER/Config
+        ThirdParty/SEGGER/RTT
 )
 
 add_definitions(
@@ -100,16 +84,16 @@ add_definitions(
 
 file(
     GLOB_RECURSE SOURCES 
-    "Core/*.*" 
-    "Middlewares/*.*" 
-    "USB_DEVICE/*.*" 
-    "Drivers/*.*"
-    "App/*.*" 
-    "Modules/*.*" 
-    "Bsp/*.*"
+    "Board/dm-h723/*.*" 
+    "ThirdParty/*.*" 
+    "Interaction/*.*" 
+    "Communication/*.*"
+    "MotorControl/*.*" 
+    "Drivers/*.*" 
+    "Algorithm/*.*"
 )
 
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32H723VGTX_FLASH.ld)
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/Board/dm-h723/STM32H723VGTX_FLASH.ld)
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
 add_link_options(-mcpu=cortex-m7 -mthumb -mthumb-interwork)

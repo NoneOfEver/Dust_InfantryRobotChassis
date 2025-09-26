@@ -12,9 +12,9 @@
 #define MODULES_MOTOR_DM_H_
 /* Includes ------------------------------------------------------------------*/
 
-#include "../../algorithm/pid/alg_pid.h"
+#include "alg_pid.h"
 #include "bsp_can.h"
-#include "../../algorithm/math/alg_math.h"
+#include "alg_math.h"
 
 /* Exported macros -----------------------------------------------------------*/
 

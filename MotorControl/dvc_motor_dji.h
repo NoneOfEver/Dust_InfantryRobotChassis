@@ -11,7 +11,7 @@
 #ifndef MODULES_MOTOR_DJI_H_
 #define MODULES_MOTOR_DJI_H_
 
-#include "../../algorithm/pid/alg_pid.h"
+#include "alg_pid.h"
 #include "bsp_can.h"
 
 /**
