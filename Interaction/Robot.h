@@ -6,6 +6,7 @@
 #include "app_gimbal.h"
 // module
 #include "dvc_MCU_comm.h"
+#include "supercap.h"
 
 /**
  * @brief 小陀螺类型
@@ -30,7 +31,8 @@ public:
     Chassis chassis_;
     // 云台
     Gimbal  gimbal_;
-
+    // 超级电容模组
+    Supercap supercap_;
     /**
      * @brief 机器人初始化
      */

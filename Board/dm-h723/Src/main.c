@@ -110,7 +110,7 @@ int main(void)
   MX_UART5_Init();
   MX_FDCAN3_Init();
   /* USER CODE BEGIN 2 */
-
+  
   /* USER CODE END 2 */
 
   /* Init scheduler */

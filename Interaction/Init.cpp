@@ -77,6 +77,12 @@ void can3_callback(CanRxBuffer *CAN_RxMessage)
             robot.gimbal_.motor_pitch_.CanRxCpltCallback(CAN_RxMessage->data);
             break;
         }
+        case (0x100)://03
+        {
+            // 超级电容控制器
+            robot.supercap_.CanRxCpltCallback(CAN_RxMessage->data);
+            break;
+        }
         default:
             break;
     }

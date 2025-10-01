@@ -68,7 +68,7 @@ include_directories(
 include_directories(
         Interaction/
         Algorithm/
-        MotorControl/
+        Device/
         Communication/
         Drivers/
         ThirdParty/SEGGER/Config
@@ -88,9 +88,9 @@ file(
     "ThirdParty/*.*" 
     "Interaction/*.*" 
     "Communication/*.*"
-    "MotorControl/*.*" 
     "Drivers/*.*" 
     "Algorithm/*.*"
+    "Device/*.*"
 )
 
 set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/Board/dm-h723/STM32H723VGTX_FLASH.ld)

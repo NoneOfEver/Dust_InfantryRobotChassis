@@ -30,7 +30,7 @@ struct McuCommData
     uint8_t         chassis_speed_y;    // 底盘移动总速度
     uint8_t         chassis_rotation;   // 自转：不转、顺时针转、逆时针转
     ChassisSpinMode chassis_spin;       // 小陀螺：不转、顺时针转、逆时针转
-    uint8_t         booster;            // 发射机构：准备、发射
+    uint8_t         supercap;           // 超级电容：充电、放电
 };
 
 struct McuSendData

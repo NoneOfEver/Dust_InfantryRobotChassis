@@ -30,6 +30,8 @@ void Robot::Init()
     gimbal_.Init();
     // 底盘初始化
     chassis_.Init();
+    // 超级电容初始化
+    supercap_.Init(&hfdcan3, 0x100, 0x003);
 
     HAL_Delay(3000);
     static const osThreadAttr_t kRobotTaskAttr = {
@@ -57,7 +59,7 @@ void Robot::Task()
     mcu_comm_data_local.chassis_speed_y     = 127;
     mcu_comm_data_local.chassis_rotation    = 127;
     mcu_comm_data_local.chassis_spin        = CHASSIS_SPIN_DISABLE;
-    mcu_comm_data_local.booster             = 0;
+    mcu_comm_data_local.supercap            = SUPERCAP_STATUS_CHARGE;
 
     for (;;)
     {
@@ -96,6 +98,17 @@ void Robot::Task()
         //     chassis_.SetTargetVelocityRotation(chassis_follow_pid_.GetOut());
         // }
 
+        // 超级电容充放电
+        if(mcu_comm_data_local.supercap == 0){
+            supercap_.SetChargeStatus(SUPERCAP_STATUS_CHARGE);
+        }else if(mcu_comm_data_local.supercap == 1){
+            supercap_.SetChargeStatus(SUPERCAP_STATUS_DISCHARGE);
+        }else{
+            supercap_.SetChargeStatus(SUPERCAP_STATUS_CHARGE);
+        }
+        supercap_.SetPowerLimitMax(100);
+        supercap_.SetChargePower(50);
+        
         // 底盘小陀螺模式
         switch(mcu_comm_data_local.chassis_spin)
         {

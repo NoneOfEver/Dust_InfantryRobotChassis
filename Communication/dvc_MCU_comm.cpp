@@ -110,7 +110,7 @@ void McuComm::CanRxCpltCallback(uint8_t* rx_data)
                     mcu_comm_data_.chassis_spin = CHASSIS_SPIN_DISABLE;
                     break;
                }
-               mcu_comm_data_.booster              = rx_data[7];
+               mcu_comm_data_.supercap             = rx_data[7];
                break;
           case 0xAC: // 自瞄yaw包
                mcu_autoaim_data_.start_of_yaw_frame = rx_data[0];
