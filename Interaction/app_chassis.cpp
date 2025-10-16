@@ -55,7 +55,7 @@ void Chassis::Task()
         motor_chassis_4_.CalculatePeriodElapsedCallback();
         // 全向轮底盘电机
         can_send_data(&hfdcan1, 0x200, g_can1_0x200_tx_data, 8);
-        osDelay(pdMS_TO_TICKS(10));
+        osDelay(pdMS_TO_TICKS(10));// 100hz电机控制频率
     }
 }
 

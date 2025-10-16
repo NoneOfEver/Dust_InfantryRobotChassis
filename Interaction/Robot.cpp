@@ -15,10 +15,13 @@
 #include "app_chassis.h"
 // module
 #include "dvc_MCU_comm.h"
+#include "interpolation.hpp"
 // bsp
 #include "bsp_usb.h"
 #include "cmsis_os2.h"
 #include "bsp_can.h"
+#include <cstdint>
+#include <stdint.h>
 
 void Robot::Init()
 {
@@ -61,6 +64,7 @@ void Robot::Task()
     mcu_comm_data_local.chassis_spin        = CHASSIS_SPIN_DISABLE;
     mcu_comm_data_local.supercap            = SUPERCAP_STATUS_CHARGE;
 
+
     for (;;)
     {
         // 用临界区一次性复制，避免撕裂
@@ -74,14 +78,14 @@ void Robot::Task()
         
         // 遥控模式
         gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
-        gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * 0.009375f);
+        gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
 
         // // 自瞄模式
         // memcpy(&mcu_comm_.mcu_autoaim_data_.pitch_f,mcu_comm_.mcu_autoaim_data_.pitch,sizeof(float));
         // gimbal_.SetTargetPitchAngle(gimbal_.GetNowPitchAngle() + mcu_comm_.mcu_autoaim_data_.pitch_f);
         // memcpy(&mcu_comm_.mcu_auto_aim_data_.Yaw_f,mcu_comm_.mcu_auto_aim_data_.Yaw,sizeof(float));
         // Gimbal.Yaw_Angle_PID.Set_Target(Gimbal.Get_Now_Yaw_Angle() + mcu_comm_.mcu_auto_aim_data_.Yaw_f);
- 
+
         // // 回传云台电机角度数据
         // mcu_comm_.mcu_send_data_.armor = 0x00;
         // mcu_comm_.mcu_send_data_.yaw = gimbal_.GetNowYawAngle();
@@ -127,7 +131,6 @@ void Robot::Task()
             // do nothing
             break; 
         };
-
-        osDelay(pdMS_TO_TICKS(10));
+        osDelay(pdMS_TO_TICKS(10));// 100hz
     }
 }

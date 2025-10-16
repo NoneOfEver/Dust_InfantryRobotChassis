@@ -14,6 +14,7 @@
 #include "FreeRTOS.h"
 // module
 #include "dvc_motor_dm.h"
+#include "interpolation.hpp"
 // bsp
 #include "bsp_log.h"
 #include "bsp_usb.h"
@@ -39,7 +40,7 @@ public:
     MotorDmNormal motor_pitch_;
 
     Pid yaw_angle_pid_;
-
+    Interpolation pitch_angle_interpolation; // pitch角插补类实例
 
     void Init();
 
@@ -71,10 +72,11 @@ public:
 
 protected:
     // pitch轴最小值
-    float min_pitch_angle_ = -0.60f;
+    float min_pitch_angle_ = -0.30f;
     // pitch轴最大值
-    float max_pitch_angle_ = 0.33f;
+    float max_pitch_angle_ = 0.50f;
 
+    float pre_pitch_angle_ = 0.0f; // 用于pitch角的插补算法
     // 内部变量
 
     // 读变量
@@ -209,6 +211,7 @@ inline void Gimbal::SetTargetYawAngle(float target_yaw_angle)
 inline void Gimbal::SetTargetPitchAngle(float target_pitch_angle)
 {
     target_pitch_angle_ = target_pitch_angle;
+    pitch_angle_interpolation.Start(pre_pitch_angle_, target_pitch_angle_, 8);
 }
 
 /**
