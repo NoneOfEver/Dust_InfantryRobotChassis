@@ -22,6 +22,7 @@ struct DwtTime
     uint16_t us;
 };
 
+extern struct DwtTime systime;
 /**
  * @brief 该宏用于计算代码段执行时间,单位为秒/s,返回值为float类型
  *        首先需要创建一个float类型的变量,用于存储时间间隔

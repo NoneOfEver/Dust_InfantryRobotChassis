@@ -52,6 +52,7 @@ else ()
 endif ()
 
 include_directories(
+        Board/dm-h723/
         Board/dm-h723/Inc 
         ThirdParty/STM32H7xx_HAL_Driver/Inc 
         ThirdParty/STM32H7xx_HAL_Driver/Inc/Legacy 
@@ -99,7 +100,11 @@ add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR
 add_link_options(-mcpu=cortex-m7 -mthumb -mthumb-interwork)
 add_link_options(-T ${LINKER_SCRIPT})
 
+link_directories(${CMAKE_SOURCE_DIR}/ThirdParty/ARM/DSP/Lib)
+
 add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
+
+target_link_libraries(${PROJECT_NAME}.elf libarm_cortexM7lfsp_math.a)
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)

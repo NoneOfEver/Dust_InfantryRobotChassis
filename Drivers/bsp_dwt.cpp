@@ -11,11 +11,11 @@
 #include "bsp_dwt.h"
 #include "cmsis_os.h"
 
-static DwtTime  systime;
+DwtTime  systime;
 static uint32_t cpu_frequncy_hz, cpu_frequncy_hz_ms, cpu_frequncy_hz_us;
 static uint32_t cyccnt_rount_count;
 static uint32_t cyccnt_last;
-static uint64_t cyccnt64;
+uint64_t cyccnt64;
 
 /**
  * @brief 私有函数,用于检查DWT CYCCNT寄存器是否溢出,并更新cyccnt_rount_count

@@ -1,8 +1,11 @@
 // app
 #include "app_chassis.h"
+#include "ins_task.h"
 
 void Chassis::Init()
 {
+    // 陀螺仪初始化
+    INS_Init();
     // 3508电机初始化
     motor_chassis_1_.pid_omega_.Init(1.0f,0.0f,0.0f);
     motor_chassis_2_.pid_omega_.Init(1.0f,0.0f,0.0f);
@@ -53,9 +56,13 @@ void Chassis::Task()
         motor_chassis_2_.CalculatePeriodElapsedCallback();
         motor_chassis_3_.CalculatePeriodElapsedCallback();
         motor_chassis_4_.CalculatePeriodElapsedCallback();
+
+        // 陀螺仪解算
+        INS_Task();
+
         // 全向轮底盘电机
         can_send_data(&hfdcan1, 0x200, g_can1_0x200_tx_data, 8);
-        osDelay(pdMS_TO_TICKS(10));// 100hz电机控制频率
+        osDelay(pdMS_TO_TICKS(1));// 1khz电机控制频率
     }
 }
 
