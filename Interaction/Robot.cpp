@@ -22,9 +22,11 @@
 #include "bsp_can.h"
 #include <cstdint>
 #include <stdint.h>
+#include "bsp_dwt.h"
 
 void Robot::Init()
 {
+    dwt_init(480);
     // 上下板通讯组件初始化
     mcu_comm_.Init(&hfdcan2, 0x01, 0x00);
     // 底盘跟随控制PID初始化
