@@ -1,10 +1,16 @@
 // app
 #include "app_chassis.h"
 #include "ins_task.h"
+#include "bmi088driver.h"
+
+//bsp
+#include "spi.h"
+#include "tim.h"
 
 void Chassis::Init()
 {
     // 陀螺仪初始化
+    BMI088_Init(&hspi2, 0);// 不启用校准模式    
     INS_Init();
     // 3508电机初始化
     motor_chassis_1_.pid_omega_.Init(1.0f,0.0f,0.0f);

@@ -17,6 +17,8 @@
 #include "stdint.h"
 #include "main.h"
 
+#define INFANTRY_ID   0 // 使用校准数据0
+
 #define BMI088_TEMP_FACTOR 0.125f
 #define BMI088_TEMP_OFFSET 23.0f
 
@@ -46,10 +48,10 @@
 
 // 需要手动修改
 #if INFANTRY_ID == 0
-#define GxOFFSET 0.00247530174f
-#define GyOFFSET 0.000393082853f
-#define GzOFFSET 0.000393082853f
-#define gNORM 9.69293118f
+#define GxOFFSET 0.0036686284f
+#define GyOFFSET 0.00337599311f
+#define GzOFFSET -0.0028714065f
+#define gNORM 9.85755444f
 #elif INFANTRY_ID == 1
 #define GxOFFSET 0.0007222f
 #define GyOFFSET -0.001786f

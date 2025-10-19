@@ -126,7 +126,7 @@ float abs_limit(float num, float Limit);
 float sign(float value);
 //浮点死区
 float float_deadband(float Value, float minValue, float maxValue);
-//int26死区
+//int16死区
 int16_t int16_deadline(int16_t Value, int16_t minValue, int16_t maxValue);
 //限幅函数
 float float_constrain(float Value, float minValue, float maxValue);

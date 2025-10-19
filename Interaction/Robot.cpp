@@ -64,7 +64,6 @@ void Robot::Task()
     mcu_comm_data_local.chassis_spin        = CHASSIS_SPIN_DISABLE;
     mcu_comm_data_local.supercap            = SUPERCAP_STATUS_CHARGE;
 
-
     for (;;)
     {
         // 用临界区一次性复制，避免撕裂

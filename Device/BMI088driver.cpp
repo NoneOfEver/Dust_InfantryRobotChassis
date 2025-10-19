@@ -226,7 +226,7 @@ void Calibrate_MPU_Offset(IMU_Data_t *bmi088)
             gNormDiff = gNormMax - gNormMin;
             for (uint8_t j = 0; j < 3; j++)
                 gyroDiff[j] = gyroMax[j] - gyroMin[j];
-            if (gNormDiff > 0.5f ||
+            if (gNormDiff > 2.0f ||
                 gyroDiff[0] > 0.15f ||
                 gyroDiff[1] > 0.15f ||
                 gyroDiff[2] > 0.15f)
@@ -247,7 +247,7 @@ void Calibrate_MPU_Offset(IMU_Data_t *bmi088)
         bmi088->TempWhenCali = bmi088_raw_temp * BMI088_TEMP_FACTOR + BMI088_TEMP_OFFSET;
 
         caliCount++;
-    } while (gNormDiff > 0.5f ||
+    } while (gNormDiff > 2.0f ||
              fabsf(bmi088->gNorm - 9.8f) > 0.5f ||
              gyroDiff[0] > 0.15f ||
              gyroDiff[1] > 0.15f ||
