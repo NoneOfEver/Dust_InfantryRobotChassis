@@ -11,7 +11,7 @@ void Chassis::Init()
 {
     // 陀螺仪初始化
     BMI088_Init(&hspi2, 0);// 不启用校准模式    
-    INS_Init();
+    INS_Init(); // 逆时针为+ ，-180 ~ 180
     // 3508电机初始化
     motor_chassis_1_.pid_omega_.Init(1.0f,0.0f,0.0f);
     motor_chassis_2_.pid_omega_.Init(1.0f,0.0f,0.0f);
