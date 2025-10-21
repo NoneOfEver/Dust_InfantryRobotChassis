@@ -7,7 +7,7 @@
 #include "dvc_MCU_comm.h"
 #include "supercap.h"
 
-#define YAW_SENSITIVITY     0.1F
+#define YAW_SENSITIVITY     0.01F
 /**
  * @brief 小陀螺类型
  * 

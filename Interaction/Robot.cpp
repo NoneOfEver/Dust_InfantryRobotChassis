@@ -15,10 +15,12 @@
 // module
 #include "dvc_MCU_comm.h"
 #include "imu.hpp"
+#include "stm32h7xx_hal_uart.h"
 #include "user_lib.h"
 // bsp
 #include "cmsis_os2.h"
 #include "bsp_dwt.h"
+#include "usart.h"
 
 void Robot::Init()
 {
@@ -30,7 +32,7 @@ void Robot::Init()
     // 底盘跟随控制PID初始化
     chassis_follow_pid_.Init(1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.01f);
     // yaw轴角度环PID初始化
-    yaw_angle_pid_.Init(1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.01f);
+    yaw_angle_pid_.Init(0.011f,0.0f,0.00003f,0.0f,0.0f,0.0f,0.01f);
     // 云台初始化
     gimbal_.Init();
     // 底盘初始化
@@ -73,9 +75,14 @@ void Robot::Task()
         mcu_comm_data_local = *const_cast<const McuCommData*>(&(mcu_comm_.mcu_comm_data_));
         __enable_irq();
 
-        virtual_angle_ += mcu_comm_data_local.yaw*YAW_SENSITIVITY;
+        virtual_angle_ += (mcu_comm_data_local.yaw - 127.0f)*YAW_SENSITIVITY;
         yaw_angle_pid_.SetTarget(loop_float_constrain(virtual_angle_,-180.0f,180.0f));
-        yaw_angle_pid_.SetNow(mcu_comm_.mcu_imu_data_.yaw_f);
+        memcpy(&mcu_comm_.mcu_imu_data_.yaw_f,mcu_comm_.mcu_imu_data_.yaw,sizeof(float));
+        HAL_UART_Transmit(&huart7,mcu_comm_.mcu_imu_data_.yaw, 4*sizeof(uint8_t), HAL_MAX_DELAY);
+        uint8_t tail[4] = {0x00,0x00,0x80,0x7f};
+        HAL_UART_Transmit(&huart7,tail, 4*sizeof(uint8_t), HAL_MAX_DELAY);
+        // yaw_angle_pid_.SetNow(mcu_comm_.mcu_imu_data_.yaw_f);
+        yaw_angle_pid_.SetNow(0);
         yaw_angle_pid_.CalculatePeriodElapsedCallback();
 
         chassis_.SetTargetVelocityX((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
@@ -83,8 +90,8 @@ void Robot::Task()
         chassis_.SetTargetVelocityRotation((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f);
         
         // 遥控模式
-        // gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
-        gimbal_.SetTargetYawOmega(yaw_angle_pid_.GetOut());
+        //gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
+        //gimbal_.SetTargetYawOmega(yaw_angle_pid_.GetOut());
         gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
 
         // // 自瞄模式

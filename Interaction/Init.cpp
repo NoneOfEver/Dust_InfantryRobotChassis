@@ -96,7 +96,7 @@ void Init()
     can_init(&hfdcan2,can2_callback);
     // CAN3 初始化，控制云台
     can_init(&hfdcan3,can3_callback);
-
+    
     HAL_Delay(1000);
     robot.Init();
 }

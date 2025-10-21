@@ -9,7 +9,6 @@
 
 void Chassis::Init()
 {
-
     // 3508电机初始化
     motor_chassis_1_.pid_omega_.Init(1.0f,0.0f,0.0f);
     motor_chassis_2_.pid_omega_.Init(1.0f,0.0f,0.0f);
