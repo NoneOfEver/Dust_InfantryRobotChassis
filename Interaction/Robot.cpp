@@ -11,17 +11,11 @@
 #include "Robot.h"
 
 // app
-#include "alg_math.h"
 #include "app_chassis.h"
 // module
 #include "dvc_MCU_comm.h"
-#include "interpolation.hpp"
 // bsp
-#include "bsp_usb.h"
 #include "cmsis_os2.h"
-#include "bsp_can.h"
-#include <cstdint>
-#include <stdint.h>
 #include "bsp_dwt.h"
 
 void Robot::Init()
@@ -93,15 +87,14 @@ void Robot::Task()
         // mcu_comm_.mcu_send_data_.pitch = gimbal_.GetNowPitchAngle();
         // mcu_comm_.CanSendCommand();
 
-        // // 底盘跟随模式
-        // if(chassis_follow_mode_status_ == true && chassis_gyroscope_mode_status_ == ROBOT_GYROSCOPE_TYPE_DISABLE){
-        //     chassis_follow_pid_.SetTarget(0.0f);
-        //     float temp_now_yaw_angle = gimbal_.GetNowYawAngle();
-        //     chassis_follow_pid_.SetNow(0.0f - math_modulus_normalization(gimbal_.GetNowYawAngle(), 2.0f * PI));
-        //     chassis_follow_pid_.CalculatePeriodElapsedCallback();
-        //     // TODO 这样解算会忽略掉遥控器上的底盘旋转指令，后期改进
-        //     chassis_.SetTargetVelocityRotation(chassis_follow_pid_.GetOut());
-        // }
+        // 底盘跟随模式
+        if(chassis_follow_mode_status_ == true && chassis_gyroscope_mode_status_ == ROBOT_GYROSCOPE_TYPE_DISABLE){
+            chassis_follow_pid_.SetTarget(mcu_comm_.mcu_imu_data_.yaw_f);
+            chassis_follow_pid_.SetNow(chassis_.imu_.GetYawAngle());
+            chassis_follow_pid_.CalculatePeriodElapsedCallback();
+            // TODO 这样解算会忽略掉遥控器上的底盘旋转指令，后期改进
+            chassis_.SetTargetVelocityRotation(chassis_follow_pid_.GetOut());
+        }
 
         // 超级电容充放电
         if(mcu_comm_data_local.supercap == 0){
@@ -118,15 +111,15 @@ void Robot::Task()
         switch(mcu_comm_data_local.chassis_spin)
         {
             case CHASSIS_SPIN_CLOCKWISE:
-            chassis_.SetTargetVelocityRotation(10.0f);
-            gimbal_.SetTargetYawOmega(-2.0f);
+                chassis_.SetTargetVelocityRotation(10.0f);
+                gimbal_.SetTargetYawOmega(-2.0f);
             break;
             case CHASSIS_SPIN_DISABLE:
             // do nothing
             break;
             case CHASSIS_SPIN_COUNTER_CLOCK_WISE:
-            chassis_.SetTargetVelocityRotation(-10.0f);
-            gimbal_.SetTargetYawOmega(2.0f);
+                chassis_.SetTargetVelocityRotation(-10.0f);
+                gimbal_.SetTargetYawOmega(2.0f);
             break;
             default:
             // do nothing

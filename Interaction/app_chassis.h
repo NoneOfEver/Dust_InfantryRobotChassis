@@ -14,6 +14,7 @@
 #include "FreeRTOS.h"
 // module
 #include "dvc_motor_dji.h"
+#include "imu.hpp"
 // bsp
 #include "bsp_log.h"
 #include "bsp_usb.h"
@@ -30,7 +31,7 @@ public:
                  motor_chassis_2_,
                  motor_chassis_3_,
                  motor_chassis_4_;
-
+    Imu imu_;
     void Init();
     void Task();
     inline void SetTargetVelocityX(float target_velocity_x);

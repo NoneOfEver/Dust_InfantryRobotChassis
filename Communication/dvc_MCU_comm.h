@@ -51,6 +51,16 @@ struct McuAutoaimData
     float pitch_f;
 };
 
+struct McuImuData
+{
+    uint8_t start_of_yaw_frame;
+    uint8_t start_of_pitch_frame;
+    uint8_t yaw[4];
+    float yaw_f;
+    uint8_t pitch[4];
+    float pitch_f;
+};
+
 class McuComm
 {
 public:
@@ -67,13 +77,23 @@ public:
     };
     McuSendData mcu_send_data_;
 
-    McuAutoaimData mcu_autoaim_data_ = {    0xAC,
-                                            0xAD,
-                                            {0},
-                                            0,
-                                            {0},
-                                            0,
-                                        };
+    McuAutoaimData mcu_autoaim_data_ = {
+            0xAC,
+            0xAD,
+            {0x00,0x00,0x00,0x00},
+            0,
+            {0x00,0x00,0x00,0x00},
+            0,
+    };
+    McuImuData mcu_imu_data_ = {
+            0xAE,
+            0xAF,
+            {0x00,0x00,0x00,0x00},
+            0,
+            {0x00,0x00,0x00,0x00},
+            0,
+    };
+
     void Init(FDCAN_HandleTypeDef *hcan,
               uint8_t can_rx_id,
               uint8_t can_tx_id
