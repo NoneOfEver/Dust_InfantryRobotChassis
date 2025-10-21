@@ -1,6 +1,5 @@
 #ifndef APP_ROBOT_H_
 #define APP_ROBOT_H_
-#include "FreeRTOS.h"
 // app
 #include "app_chassis.h"
 #include "app_gimbal.h"
@@ -8,6 +7,7 @@
 #include "dvc_MCU_comm.h"
 #include "supercap.h"
 
+#define YAW_SENSITIVITY     0.1F
 /**
  * @brief 小陀螺类型
  * 
@@ -33,12 +33,18 @@ public:
     Gimbal  gimbal_;
     // 超级电容模组
     Supercap supercap_;
+    // 底盘陀螺仪
+    Imu imu_;
+    // 云台yaw轴角度环pid
+    Pid yaw_angle_pid_;
+
     /**
      * @brief 机器人初始化
      */
     void Init();
     void Task();
 protected:
+    float virtual_angle_ = 0;
     // 小陀螺功能状态
     RobotGyroscopeType chassis_gyroscope_mode_status_ = ROBOT_GYROSCOPE_TYPE_DISABLE;
     // 底盘跟随模式是否使能

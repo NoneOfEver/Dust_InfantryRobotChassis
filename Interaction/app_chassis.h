@@ -31,7 +31,6 @@ public:
                  motor_chassis_2_,
                  motor_chassis_3_,
                  motor_chassis_4_;
-    Imu imu_;
     void Init();
     void Task();
     inline void SetTargetVelocityX(float target_velocity_x);
@@ -49,6 +48,7 @@ protected:
     void OutputToMotor();
     static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
 };
+
 /**
  * @brief 设定目标速度X
  *

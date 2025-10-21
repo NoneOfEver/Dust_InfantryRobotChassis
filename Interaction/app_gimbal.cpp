@@ -16,8 +16,6 @@ void Gimbal::Init()
     motor_yaw_.Init(&hfdcan3, 0x12, 0x01);
     motor_pitch_.Init(&hfdcan3, 0x11, 0x02);
 
-    // yaw_angle_pid_.Init(1,0,0,0,0,3.14f);
-
     motor_yaw_.CanSendClearError();
     HAL_Delay(1000);
     motor_yaw_.CanSendEnter();

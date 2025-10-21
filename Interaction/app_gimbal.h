@@ -39,7 +39,6 @@ public:
     MotorDmNormal motor_yaw_;
     MotorDmNormal motor_pitch_;
 
-    Pid yaw_angle_pid_;
     Interpolation pitch_angle_interpolation; // pitch角插补类实例
 
     void Init();

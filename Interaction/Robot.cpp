@@ -14,6 +14,8 @@
 #include "app_chassis.h"
 // module
 #include "dvc_MCU_comm.h"
+#include "imu.hpp"
+#include "user_lib.h"
 // bsp
 #include "cmsis_os2.h"
 #include "bsp_dwt.h"
@@ -23,8 +25,12 @@ void Robot::Init()
     dwt_init(480);
     // 上下板通讯组件初始化
     mcu_comm_.Init(&hfdcan2, 0x01, 0x00);
+    // 陀螺仪初始化
+    imu_.Init();
     // 底盘跟随控制PID初始化
-    chassis_follow_pid_.Init(1.0f, 0.0f, 0.0f);
+    chassis_follow_pid_.Init(1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.01f);
+    // yaw轴角度环PID初始化
+    yaw_angle_pid_.Init(1.0f,0.0f,0.0f,0.0f,0.0f,0.0f,0.01f);
     // 云台初始化
     gimbal_.Init();
     // 底盘初始化
@@ -67,12 +73,18 @@ void Robot::Task()
         mcu_comm_data_local = *const_cast<const McuCommData*>(&(mcu_comm_.mcu_comm_data_));
         __enable_irq();
 
+        virtual_angle_ += mcu_comm_data_local.yaw*YAW_SENSITIVITY;
+        yaw_angle_pid_.SetTarget(loop_float_constrain(virtual_angle_,-180.0f,180.0f));
+        yaw_angle_pid_.SetNow(mcu_comm_.mcu_imu_data_.yaw_f);
+        yaw_angle_pid_.CalculatePeriodElapsedCallback();
+
         chassis_.SetTargetVelocityX((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
         chassis_.SetTargetVelocityY((mcu_comm_data_local.chassis_speed_y - 127.0f) * 10.0f / 128.0f); //9
         chassis_.SetTargetVelocityRotation((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f);
         
         // 遥控模式
-        gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
+        // gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
+        gimbal_.SetTargetYawOmega(yaw_angle_pid_.GetOut());
         gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
 
         // // 自瞄模式
@@ -87,14 +99,14 @@ void Robot::Task()
         // mcu_comm_.mcu_send_data_.pitch = gimbal_.GetNowPitchAngle();
         // mcu_comm_.CanSendCommand();
 
-        // 底盘跟随模式
-        if(chassis_follow_mode_status_ == true && chassis_gyroscope_mode_status_ == ROBOT_GYROSCOPE_TYPE_DISABLE){
-            chassis_follow_pid_.SetTarget(mcu_comm_.mcu_imu_data_.yaw_f);
-            chassis_follow_pid_.SetNow(chassis_.imu_.GetYawAngle());
-            chassis_follow_pid_.CalculatePeriodElapsedCallback();
-            // TODO 这样解算会忽略掉遥控器上的底盘旋转指令，后期改进
-            chassis_.SetTargetVelocityRotation(chassis_follow_pid_.GetOut());
-        }
+        // // 底盘跟随模式
+        // if(chassis_follow_mode_status_ == true && chassis_gyroscope_mode_status_ == ROBOT_GYROSCOPE_TYPE_DISABLE){
+        //     chassis_follow_pid_.SetTarget(mcu_comm_.mcu_imu_data_.yaw_f);
+        //     chassis_follow_pid_.SetNow(chassis_.imu_.GetYawAngle());
+        //     chassis_follow_pid_.CalculatePeriodElapsedCallback();
+        //     // TODO 这样解算会忽略掉遥控器上的底盘旋转指令，后期改进
+        //     chassis_.SetTargetVelocityRotation(chassis_follow_pid_.GetOut());
+        // }
 
         // 超级电容充放电
         if(mcu_comm_data_local.supercap == 0){
