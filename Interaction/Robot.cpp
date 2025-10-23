@@ -33,9 +33,10 @@ void Robot::Init()
     imu_.Init();
     osDelay(pdMS_TO_TICKS(10000));// 10s时间等待陀螺仪收敛
     // 底盘跟随控制PID初始化
-    chassis_follow_pid_.Init(1.5f,0.0f,0.0f,0.0f,0.0f,9.0f,0.001f);
-    // yaw轴角度环PID初始化
-    yaw_angle_pid_.Init(0.25f,0.00018f,0.00024f,0.0f,0.0f,0.0f,0.001f);//kp_osc 0.035 0.07 0.00015 0.000020
+    chassis_follow_pid_.Init(17.0f,0.0f,0.0f,5.0f,0.0f,6.0f,0.001f,0.0f,0.0f,0.0f,0.0f);
+    // yaw轴角度环PID初始化 0.045f,0.050800f,0.001500f,0.1f,0.0f,45.0f,0.001f
+    //                     0.047f,0.050800f,0.002000f,0.1f,25.0f,45.0f,0.001f
+    yaw_angle_pid_.Init(0.048f,0.050800f,0.002000f,0.1f,25.0f,45.0f,0.001f,0.0f,0.0f,0.0f,180);//kp_osc 0.035 0.07 0.00015 0.000020
     // 云台初始化
     gimbal_.Init();
     // 底盘初始化
@@ -71,7 +72,7 @@ void Robot::Task()
     mcu_comm_data_local.supercap            = SUPERCAP_STATUS_CHARGE;
 
 
-    // static uint8_t virtual_angle_debug[4];
+    uint8_t virtual_angle_debug[4];
     // static uint8_t imu_angle_debug[4];
     // static uint8_t tail[4] = {0x00,0x00,0x80,0x7f};
     // static uint8_t tx_buf[12];
@@ -85,30 +86,27 @@ void Robot::Task()
         __enable_irq();
 
         virtual_angle_ += ( 127.0f - mcu_comm_data_local.yaw)*YAW_SENSITIVITY;
+        // virtual_angle_ = (127.0f - mcu_comm_data_local.yaw); //绝对值映射
         yaw_angle_pid_.SetTarget(virtual_angle_);
         
         ////陀螺仪调试
         memcpy(&mcu_comm_.mcu_imu_data_.yaw_total_angle_f,mcu_comm_.mcu_imu_data_.yaw_total_angle,sizeof(float));
-        // HAL_UART_Transmit(&huart7,mcu_comm_.mcu_imu_data_.yaw_total_angle, 4*sizeof(uint8_t), HAL_MAX_DELAY);
-        // uint8_t tail[4] = {0x00,0x00,0x80,0x7f};
-        // HAL_UART_Transmit(&huart7,tail, 4*sizeof(uint8_t), HAL_MAX_DELAY);
+        HAL_UART_Transmit(&huart7,mcu_comm_.mcu_imu_data_.yaw_total_angle, 4*sizeof(uint8_t), HAL_MAX_DELAY);
+        memcpy(virtual_angle_debug,&virtual_angle_,sizeof(float));
+        HAL_UART_Transmit(&huart7,virtual_angle_debug, 4*sizeof(uint8_t), HAL_MAX_DELAY);
+        uint8_t tail[4] = {0x00,0x00,0x80,0x7f};
+        HAL_UART_Transmit(&huart7,tail, 4*sizeof(uint8_t), HAL_MAX_DELAY);
 
         yaw_angle_pid_.SetNow(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
-        // 云台yaw轴调试
-        // memcpy(&tx_buf[0], virtual_angle_debug, 4);
-        // memcpy(&tx_buf[4], imu_angle_debug, 4);
-        // memcpy(&tx_buf[8], tail, 4);
-        // HAL_UART_Transmit(&huart7, tx_buf, sizeof(tx_buf), HAL_MAX_DELAY);
-        // yaw_angle_pid_.SetNow(0);
         yaw_angle_pid_.CalculatePeriodElapsedCallback();
 
-        chassis_follow_pid_.SetTarget(0.0f);
+        chassis_follow_pid_.SetTarget(3.9f);
         chassis_follow_pid_.SetNow(gimbal_.GetNowYawAngle());
         chassis_follow_pid_.CalculatePeriodElapsedCallback();
 
         chassis_.SetTargetVelocityX((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
         chassis_.SetTargetVelocityY((mcu_comm_data_local.chassis_speed_y - 127.0f) * 10.0f / 128.0f); //9
-        //chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f)-chassis_follow_pid_.GetOut());
+        chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f)-chassis_follow_pid_.GetOut());
         
         // 遥控模式
         //gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
@@ -152,19 +150,17 @@ void Robot::Task()
         {
             case CHASSIS_SPIN_CLOCKWISE:
                 chassis_.SetTargetVelocityRotation(10.0f);
-                //gimbal_.SetTargetYawOmega(-2.0f);
             break;
             case CHASSIS_SPIN_DISABLE:
             // do nothing
             break;
             case CHASSIS_SPIN_COUNTER_CLOCK_WISE:
                 chassis_.SetTargetVelocityRotation(-10.0f);
-                //gimbal_.SetTargetYawOmega(2.0f);
             break;
             default:
             // do nothing
             break; 
         };
-        osDelay(pdMS_TO_TICKS(1));// 1000hz
+        osDelay(pdMS_TO_TICKS(1));// 1khz
     }
 }

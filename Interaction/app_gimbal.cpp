@@ -9,6 +9,7 @@
  * 
  */
 #include "app_gimbal.h"
+#include "cmsis_os2.h"
 #include "interpolation.hpp"
 void Gimbal::Init()
 {
@@ -17,17 +18,17 @@ void Gimbal::Init()
     motor_pitch_.Init(&hfdcan3, 0x11, 0x02);
 
     motor_yaw_.CanSendClearError();
-    HAL_Delay(1000);
+    osDelay(1000);
     motor_yaw_.CanSendEnter();
     motor_pitch_.CanSendEnter();
-    HAL_Delay(1000);
+    osDelay(1000);
 
     // motor_yaw_.SetKp(0);
     motor_yaw_.SetKp(0); //MIT模式kp
     // motor_pitch_.SetKp(3); // 3
     motor_pitch_.SetKp(26);//25
 
-    motor_yaw_.SetKd(0.4); // MIT模式kd
+    motor_yaw_.SetKd(0.05); // MIT模式kd
     // motor_pitch_.SetKd(0.03);
     motor_pitch_.SetKd(0.028);//0.06
 
