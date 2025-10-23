@@ -55,8 +55,8 @@ struct McuImuData
 {
     uint8_t start_of_yaw_frame;
     uint8_t start_of_pitch_frame;
-    uint8_t yaw[4];
-    float yaw_f;
+    uint8_t yaw_total_angle[4];
+    float yaw_total_angle_f;
     uint8_t pitch[4];
     float pitch_f;
 };

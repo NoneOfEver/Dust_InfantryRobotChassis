@@ -128,10 +128,10 @@ void McuComm::CanRxCpltCallback(uint8_t* rx_data)
                break;
           case 0xAE: // 云台IMU yaw包
                mcu_imu_data_.start_of_yaw_frame = rx_data[0];
-               mcu_imu_data_.yaw[0]             = rx_data[1];
-               mcu_imu_data_.yaw[1]             = rx_data[2];
-               mcu_imu_data_.yaw[2]             = rx_data[3];
-               mcu_imu_data_.yaw[3]             = rx_data[4];
+               mcu_imu_data_.yaw_total_angle[0]             = rx_data[1];
+               mcu_imu_data_.yaw_total_angle[1]             = rx_data[2];
+               mcu_imu_data_.yaw_total_angle[2]             = rx_data[3];
+               mcu_imu_data_.yaw_total_angle[3]             = rx_data[4];
                break;
           case 0xAF: // 云台IMU pitch包
                mcu_imu_data_.start_of_pitch_frame = rx_data[0];

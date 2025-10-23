@@ -41,9 +41,9 @@ public:
         osThreadNew(TaskEntry, this, &ImuTaskAttr);
     }
 
-    inline float GetYawAngle()
+    inline float GetYawAngleTotalAngle()
     {
-        return INS.Yaw;
+        return INS.YawTotalAngle;
     }
 };
 
