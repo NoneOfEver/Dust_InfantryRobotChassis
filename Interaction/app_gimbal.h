@@ -61,6 +61,15 @@ public:
 
     inline float GetTargetPitchOmega();
 
+    inline float GetYawOmegaFeedforword()
+    {
+        return yaw_omega_feedforword_;
+    }
+    inline float GetPitchOmegaFeedforword()
+    {
+        return pitch_omega_feedforword_;
+    }
+
     inline void SetTargetYawAngle(float target_yaw_angle);
 
     inline void SetTargetPitchAngle(float target_pitch_angle);
@@ -68,6 +77,15 @@ public:
     inline void SetTargetYawOmega(float target_yaw_omega);
 
     inline void SetTargetPitchOmega(float target_pitch_omega);
+
+    inline void SetYawOmegaFeedforword(float yaw_omega_feedforword)
+    {
+        yaw_omega_feedforword_ = yaw_omega_feedforword;
+    }
+    inline void SetPitchOmegaFeedforword(float pitch_omega_feedforword)
+    {
+        pitch_omega_feedforword_ = pitch_omega_feedforword;
+    }
 
 protected:
     // pitch轴最小值
@@ -105,6 +123,11 @@ protected:
     float target_yaw_omega_ = 0.0f;
     // pitch轴目标角速度
     float target_pitch_omega_ = 0.0f;
+
+    // yaw轴角速度前馈
+    float yaw_omega_feedforword_ = 0.0f;
+    // pitch轴角速度前馈
+    float pitch_omega_feedforword_ = 0.0f;
 
     void SelfResolution();
     void MotorNearestTransposition();

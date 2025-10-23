@@ -12,6 +12,8 @@
 
 // app
 #include "app_chassis.h"
+#include "slidingmodec.h"
+#include "general_def.h"
 // module
 #include "dvc_mcu_comm.h"
 #include "imu.hpp"
@@ -36,7 +38,8 @@ void Robot::Init()
     chassis_follow_pid_.Init(17.0f,0.0f,0.0f,5.0f,0.0f,6.0f,0.001f,0.0f,0.0f,0.0f,0.0f);
     // yaw轴角度环PID初始化 0.045f,0.050800f,0.001500f,0.1f,0.0f,45.0f,0.001f
     //                     0.047f,0.050800f,0.002000f,0.1f,25.0f,45.0f,0.001f
-    yaw_angle_pid_.Init(0.048f,0.050800f,0.002000f,0.1f,25.0f,45.0f,0.001f,0.0f,0.0f,0.0f,180);//kp_osc 0.035 0.07 0.00015 0.000020
+    //                     0.048f,0.050800f,0.002000f,0.1f,25.0f,45.0f,0.001f,0.0f,0.0f,0.0f,180
+    yaw_angle_pid_.Init(0.080f,0.050800f,0.002000f,10.0f,25.0f,45.0f,0.001f,0.0f,0.0f,0.0f,20);//kp_osc 0.035 0.07 0.00015 0.000020
     // 云台初始化
     gimbal_.Init();
     // 底盘初始化
@@ -70,7 +73,9 @@ void Robot::Task()
     mcu_comm_data_local.chassis_rotation    = 127;
     mcu_comm_data_local.chassis_spin        = CHASSIS_SPIN_DISABLE;
     mcu_comm_data_local.supercap            = SUPERCAP_STATUS_CHARGE;
-
+    
+    // 5, 10, 0, 2.5, 45, 0.8, 1.0
+    Smc YawSMC(20, 120, 0, 2.5, 45, 0.8, 1.0); //这是一个yaw轴参考电机参数
 
     uint8_t virtual_angle_debug[4];
     // static uint8_t imu_angle_debug[4];
@@ -100,17 +105,23 @@ void Robot::Task()
         yaw_angle_pid_.SetNow(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
         yaw_angle_pid_.CalculatePeriodElapsedCallback();
 
-        chassis_follow_pid_.SetTarget(3.9f);
+        YawSMC.ref = virtual_angle_;
+        YawSMC.Smc_Tick(mcu_comm_.mcu_imu_data_.yaw_total_angle_f, RAD_2_DEGREE * gimbal_.GetNowYawOmega());
+
+        chassis_follow_pid_.SetTarget(4.0f);
         chassis_follow_pid_.SetNow(gimbal_.GetNowYawAngle());
         chassis_follow_pid_.CalculatePeriodElapsedCallback();
 
         chassis_.SetTargetVelocityX((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
         chassis_.SetTargetVelocityY((mcu_comm_data_local.chassis_speed_y - 127.0f) * 10.0f / 128.0f); //9
-        chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f)-chassis_follow_pid_.GetOut());
-        
+        // chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f)-chassis_follow_pid_.GetOut());
+        // gimbal_.SetYawOmegaFeedforword(-0.9f*chassis_follow_pid_.GetOut());
+        chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f));
+
         // 遥控模式
         //gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
-        gimbal_.SetTargetYawOmega(-(yaw_angle_pid_.GetOut()));
+        // gimbal_.SetTargetYawOmega(-(yaw_angle_pid_.GetOut() + gimbal_.GetYawOmegaFeedforword()));
+        gimbal_.SetTargetYawOmega((YawSMC.u));
         gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
 
         // // 自瞄模式
@@ -124,15 +135,6 @@ void Robot::Task()
         // mcu_comm_.mcu_send_data_.yaw = gimbal_.GetNowYawAngle();
         // mcu_comm_.mcu_send_data_.pitch = gimbal_.GetNowPitchAngle();
         // mcu_comm_.CanSendCommand();
-
-        // // 底盘跟随模式
-        // if(chassis_follow_mode_status_ == true && chassis_gyroscope_mode_status_ == ROBOT_GYROSCOPE_TYPE_DISABLE){
-        //     chassis_follow_pid_.SetTarget(mcu_comm_.mcu_imu_data_.yaw_f);
-        //     chassis_follow_pid_.SetNow(chassis_.imu_.GetYawAngle());
-        //     chassis_follow_pid_.CalculatePeriodElapsedCallback();
-        //     // TODO 这样解算会忽略掉遥控器上的底盘旋转指令，后期改进
-        //     chassis_.SetTargetVelocityRotation(chassis_follow_pid_.GetOut());
-        // }
 
         // 超级电容充放电
         if(mcu_comm_data_local.supercap == 0){
