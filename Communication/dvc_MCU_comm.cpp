@@ -1,6 +1,6 @@
-#include "dvc_MCU_comm.h"
-#include "dvc_motor_dm.h"
-
+#include "dvc_mcu_comm.h"
+#include "cmsis_os2.h"
+#include <cstring>
 void McuComm::Init(
      FDCAN_HandleTypeDef* hcan,
      uint8_t can_rx_id,
@@ -132,6 +132,7 @@ void McuComm::CanRxCpltCallback(uint8_t* rx_data)
                mcu_imu_data_.yaw_total_angle[1]             = rx_data[2];
                mcu_imu_data_.yaw_total_angle[2]             = rx_data[3];
                mcu_imu_data_.yaw_total_angle[3]             = rx_data[4];
+               memcpy(&mcu_imu_data_.yaw_total_angle_f,mcu_imu_data_.yaw_total_angle,sizeof(float));
                break;
           case 0xAF: // 云台IMU pitch包
                mcu_imu_data_.start_of_pitch_frame = rx_data[0];
@@ -139,6 +140,7 @@ void McuComm::CanRxCpltCallback(uint8_t* rx_data)
                mcu_imu_data_.pitch[1]             = rx_data[2];
                mcu_imu_data_.pitch[2]             = rx_data[3];
                mcu_imu_data_.pitch[3]             = rx_data[4];
+               memcpy(&mcu_imu_data_.pitch_f,mcu_imu_data_.pitch,sizeof(float));
                break;
           default:
                break;

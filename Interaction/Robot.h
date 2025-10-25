@@ -3,11 +3,13 @@
 // app
 #include "app_chassis.h"
 #include "app_gimbal.h"
+#include "user_lib.h"
 // module
-#include "dvc_MCU_comm.h"
+#include "dvc_mcu_comm.h"
 #include "supercap.h"
+#include "debug_tools.h"
 
-#define YAW_SENSITIVITY     0.002F
+#define YAW_SENSITIVITY     0.001F
 /**
  * @brief 小陀螺类型
  * 
@@ -22,13 +24,18 @@ enum RobotGyroscopeType
 class Robot
 {
 public:
-
+    // 调试工具
+    DebugTools debug_tools_;
     // 与上板的通讯服务
     McuComm mcu_comm_;
     // 底盘跟随控制PID
     Pid chassis_follow_pid_;
     // 底盘
     Chassis chassis_;
+    // 底盘小陀螺斜坡规划器
+    float ramp_temp = 0.0f;
+    ramp_function_source_t chassis_spin_ramp_source;
+
     // 云台
     Gimbal  gimbal_;
     // 超级电容模组
@@ -44,6 +51,7 @@ public:
     void Init();
     void Task();
 protected:
+    // 操作手控制的的虚拟角度
     float virtual_angle_ = 0;
     // 小陀螺功能状态
     RobotGyroscopeType chassis_gyroscope_mode_status_ = ROBOT_GYROSCOPE_TYPE_DISABLE;

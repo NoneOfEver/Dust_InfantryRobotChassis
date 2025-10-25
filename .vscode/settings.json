@@ -1,6 +1,7 @@
 {
     "clangd.diagnostics.enabled": false,
     "files.associations": {
-        "xiosbase": "cpp"
+        "xiosbase": "cpp",
+        "cstdint": "cpp"
     }
 }

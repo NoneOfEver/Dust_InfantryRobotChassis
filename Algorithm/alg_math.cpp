@@ -219,4 +219,15 @@ float math_int_to_float(int32_t x, int32_t int_min, int32_t int_max, float float
     return (out);
 }
 
+// 返回值范围: -π ~ π 获取相对于上电时候的角度
+float get_relative_angle_pm_pi(float now_angle_cum, float zero_angle)
+{
+    float rel = fmodf(now_angle_cum - zero_angle, 2.0f * M_PI); // [-2π, 2π)
+    if (rel > M_PI)
+        rel -= 2.0f * M_PI;
+    else if (rel < -M_PI)
+        rel += 2.0f * M_PI;
+    return rel;
+}
+
 /************************ COPYRIGHT(C) HNUST-DUST **************************/

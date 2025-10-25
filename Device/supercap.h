@@ -1,5 +1,5 @@
 #ifndef DEVICE_SUPERCAP_H_
-#define SUPERCAP_H_
+#define DEVICE_SUPERCAP_H_
 
 #include "bsp_can.h"
 #include <cstdint>

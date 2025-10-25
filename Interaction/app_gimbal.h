@@ -69,7 +69,15 @@ public:
     {
         return pitch_omega_feedforword_;
     }
+    float GetYawRelativeZeroAngle()
+    {
+        return yaw_relative_zero_angle_;
+    }
 
+    float GetYawNowAngleNoncumulative()
+    {
+        return yaw_now_angle_noncumulative_;
+    }
     inline void SetTargetYawAngle(float target_yaw_angle);
 
     inline void SetTargetPitchAngle(float target_pitch_angle);
@@ -129,6 +137,14 @@ protected:
     // pitch轴角速度前馈
     float pitch_omega_feedforword_ = 0.0f;
 
+    // yaw轴相对于上电时的角度
+    float yaw_relative_zero_angle_ = 0.0f;
+
+    // yaw轴上电时的绝对角度
+    float yaw_zero_angle_ = 0.0f;
+
+    // yaw轴电机非累计角度 rad
+    float yaw_now_angle_noncumulative_ = 0.0f;
     void SelfResolution();
     void MotorNearestTransposition();
     void Output();

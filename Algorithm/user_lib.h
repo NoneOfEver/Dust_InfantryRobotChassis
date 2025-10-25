@@ -94,6 +94,7 @@ typedef struct
     float min_value;    //限幅最小值
     float max_value;    //限幅最大值
     float frame_period; //时间间隔
+    uint8_t is_completed = 1; //斜坡完成标志位
 } ramp_function_source_t;
 
 typedef struct __attribute__((__packed__))

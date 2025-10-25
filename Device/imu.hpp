@@ -30,7 +30,7 @@ public:
     void Init()
     {
         // 陀螺仪初始化
-        BMI088_Init(&hspi2, 0);// 启用校准模式    
+        BMI088_Init(&hspi2, 0);// 不启用校准模式    
         INS_Init(); // 逆时针为+ ，-180 ~ 180
         static const osThreadAttr_t ImuTaskAttr = {
             .name = "ImuTask",

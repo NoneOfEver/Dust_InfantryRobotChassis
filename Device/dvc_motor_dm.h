@@ -171,6 +171,7 @@ struct MotorDmRxDataNormal
     uint32_t pre_encoder;
     int32_t total_encoder;
     int32_t total_round;
+    float now_angle_noncumulative;
 };
 
 /**
@@ -222,6 +223,8 @@ public:
     inline enum MotorDmControlStatusNormal GetControlStatus();
 
     inline float GetNowAngle();
+
+    inline float GetNowAngleNoncumulative();
 
     inline float GetNowOmega();
 
@@ -544,6 +547,10 @@ inline float MotorDmNormal::GetNowAngle()
     return (rx_data_.now_angle);
 }
 
+inline float MotorDmNormal::GetNowAngleNoncumulative()
+{
+    return (rx_data_.now_angle_noncumulative);
+}
 /**
  * @brief 获取当前角速度
  *

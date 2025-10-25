@@ -11,6 +11,8 @@
 #include "app_gimbal.h"
 #include "cmsis_os2.h"
 #include "interpolation.hpp"
+#include "alg_math.h"
+
 void Gimbal::Init()
 {
     // 6220电机初始化
@@ -61,8 +63,17 @@ void Gimbal::Init()
  */
 void Gimbal::SelfResolution()
 {
+    static uint8_t first_resolution_flag = 0;
     now_pitch_angle_ = motor_pitch_.GetNowAngle();
     now_yaw_angle_   = motor_yaw_.GetNowAngle();
+    if(first_resolution_flag == 0){
+        first_resolution_flag = 1;
+        yaw_zero_angle_ = now_yaw_angle_;
+        yaw_relative_zero_angle_ = 0.0f;
+    }else{
+        yaw_relative_zero_angle_ = get_relative_angle_pm_pi(now_yaw_angle_, yaw_zero_angle_);
+    }
+    yaw_now_angle_noncumulative_ = motor_yaw_.GetNowAngleNoncumulative();
     // yaw_angle_pid_.SetNow(now_yaw_angle_);
     // yaw_angle_pid_.CalculatePeriodElapsedCallback();
     // target_yaw_omega_ = yaw_angle_pid_.GetOut();

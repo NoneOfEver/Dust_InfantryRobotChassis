@@ -57,6 +57,8 @@ int32_t math_float_to_int(float x, float float_min, float float_max, int32_t int
 
 float math_int_to_float(int32_t x, int32_t int_min, int32_t int_max, float float_min, float float_max);
 
+float get_relative_angle_pm_pi(float now_angle_cum, float zero_angle);
+
 /**
  * @brief 限幅函数
  *
@@ -114,6 +116,8 @@ Type math_modulus_normalization(Type x, Type modulus)
 
     return (tmp - modulus / 2.0f);
 }
+
+
 #endif
 
 /************************ COPYRIGHT(C) HNUST-DUST **************************/

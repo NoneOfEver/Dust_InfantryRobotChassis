@@ -1,5 +1,5 @@
 /**
- * @file dvc_MCU_comm.h
+ * @file dvc_mcu_comm.h
  * @author noe (noneofever@gmail.com)
  * @brief 
  * @version 0.1
@@ -11,8 +11,8 @@
 #ifndef MODULES_COMM_DVC_MCU_COMM_H
 #define MODULES_COMM_DVC_MCU_COMM_H
 #include "bsp_can.h"
-#include "FreeRTOS.h"
-#include "cmsis_os2.h"
+#include "supercap.h"
+
 
 
 enum ChassisSpinMode{
@@ -23,14 +23,14 @@ enum ChassisSpinMode{
 
 struct McuCommData
 {
-    uint8_t         start_of_frame;     // 帧头
-    uint8_t         yaw;                // yaw
-    uint8_t         pitch_angle;        // 俯仰角度
-    uint8_t         chassis_speed_x;    // 平移方向：前、后、左、右
-    uint8_t         chassis_speed_y;    // 底盘移动总速度
-    uint8_t         chassis_rotation;   // 自转：不转、顺时针转、逆时针转
-    ChassisSpinMode chassis_spin;       // 小陀螺：不转、顺时针转、逆时针转
-    uint8_t         supercap;           // 超级电容：充电、放电
+    uint8_t         start_of_frame;                             // 帧头
+    uint8_t         yaw              = 127;                     // yaw
+    uint8_t         pitch_angle      = 127;                     // 俯仰角度
+    uint8_t         chassis_speed_x  = 127;                     // 平移方向：前、后、左、右
+    uint8_t         chassis_speed_y  = 127;                     // 底盘移动总速度
+    uint8_t         chassis_rotation = 127;                     // 自转：不转、顺时针转、逆时针转
+    ChassisSpinMode chassis_spin     = CHASSIS_SPIN_DISABLE;    // 小陀螺：不转、顺时针转、逆时针转
+    uint8_t         supercap         = SUPERCAP_STATUS_DISABLE; // 超级电容：充电、放电
 };
 
 struct McuSendData

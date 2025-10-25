@@ -91,6 +91,7 @@ void ramp_init(ramp_function_source_t *ramp_source_type, float frame_period, flo
   */
 float ramp_calc(ramp_function_source_t *ramp_source_type, float input)
 {
+    ramp_source_type->is_completed = 0; //开始计算的时候，标志位置0
     ramp_source_type->input = input;
     ramp_source_type->out += ramp_source_type->input * ramp_source_type->frame_period;
     if (ramp_source_type->out > ramp_source_type->max_value)
@@ -100,6 +101,10 @@ float ramp_calc(ramp_function_source_t *ramp_source_type, float input)
     else if (ramp_source_type->out < ramp_source_type->min_value)
     {
         ramp_source_type->out = ramp_source_type->min_value;
+    }
+    if(ramp_source_type->out == ramp_source_type->max_value || ramp_source_type->out == ramp_source_type->min_value)
+    {
+        ramp_source_type->is_completed = 1; //到达最大值或最小值，标志位置1
     }
     return ramp_source_type->out;
 }

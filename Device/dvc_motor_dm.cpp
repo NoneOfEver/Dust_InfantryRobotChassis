@@ -390,6 +390,7 @@ void MotorDmNormal::DataProcess()
     rx_data_.total_encoder = rx_data_.total_round * (1 << 16) + tmp_encoder - ((1 << 15) - 1);
 
     // 计算电机本身信息
+    rx_data_.now_angle_noncumulative = ((float)((tmp_encoder / 65535.0f) * (angle_max_ * 2.0f)) - angle_max_);
     rx_data_.now_angle = (float)(rx_data_.total_encoder) / (float)((1 << 16) - 1) * angle_max_ * 2.0f;
     rx_data_.now_omega = math_int_to_float(tmp_omega, 0x7ff, (1 << 12) - 1, 0, omega_max_);
     rx_data_.now_torque = math_int_to_float(tmp_torque, 0x7ff, (1 << 12) - 1, 0, torque_max_);
