@@ -14,6 +14,7 @@
 // app
 #include "app_chassis.h"
 #include "user_lib.h"
+#include "alg_math.h"
 // module
 #include "dvc_mcu_comm.h"
 #include "imu.hpp"
@@ -61,7 +62,8 @@ void Robot::Init()
         0.0f,
         15.0f
     );
-    
+    //pitch轴角度环PID初始化
+    pitch_angle_pid_.Init(0.08f,0.0f,0.0f,0.0f,0.0f,45.0f,0.001f);
     // 云台初始化
     gimbal_.Init();
     // 底盘初始化
@@ -93,6 +95,8 @@ void Robot::Task()
     McuCommData mcu_comm_data_local;
     McuCommData mcu_comm_data_local_pre;
     uint8_t first_flag = 0;
+    float error = 0.0f;
+    float adjusted_now = 0.0f;
     for (;;)
     {
         __disable_irq();
@@ -112,20 +116,22 @@ void Robot::Task()
 
         // 遥控模式
         // gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
-        gimbal_.SetTargetYawOmega(-(yaw_angle_pid_.GetOut() + gimbal_.GetYawOmegaFeedforword())); //补偿速度可能符号错了
-        gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
+        // gimbal_.SetTargetYawOmega(-(yaw_angle_pid_.GetOut() + gimbal_.GetYawOmegaFeedforword())); //补偿速度可能符号错了
+        // gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
 
         /********************** 底盘 ***********************/ 
         // if((mcu_comm_data_local.chassis_spin == CHASSIS_SPIN_DISABLE) && 
         //    (chassis_spin_ramp_source.is_completed == 1)) 
         // {
-            chassis_follow_pid_.SetTarget(2.54f); // 相对于底盘弧度 0rad
-            chassis_follow_pid_.SetNow(gimbal_.GetYawNowAngleNoncumulative());
+            error = normalize_angle_diff(0.0f, gimbal_.GetYawNowAngleNoncumulative());
+            adjusted_now = 0.0f - error;
+            chassis_follow_pid_.SetTarget(0.0f); // 相对于底盘弧度 0rad
+            chassis_follow_pid_.SetNow(adjusted_now);
             chassis_follow_pid_.CalculatePeriodElapsedCallback();
 
-            chassis_.SetTargetVelocityX((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
-            chassis_.SetTargetVelocityY((mcu_comm_data_local.chassis_speed_y - 127.0f) * 10.0f / 128.0f); //9
-            chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f)-chassis_follow_pid_.GetOut());
+            // chassis_.SetTargetVelocityX((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
+            // chassis_.SetTargetVelocityY((mcu_comm_data_local.chassis_speed_y - 127.0f) * 10.0f / 128.0f); //9
+            // chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f)-chassis_follow_pid_.GetOut());
             gimbal_.SetYawOmegaFeedforword(-0.9f*chassis_follow_pid_.GetOut());
             // chassis_.SetTargetVelocityRotation(((mcu_comm_data_local.chassis_rotation - 127.0f) * 9.0f / 128.0f));
         // } 
@@ -164,8 +170,10 @@ void Robot::Task()
 
         /********************** 调试信息 ***********************/   
         debug_tools_.VofaSendFloat(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
-        debug_tools_.VofaSendFloat(virtual_angle_);
+        // debug_tools_.VofaSendFloat(virtual_angle_);
         // debug_tools_.VofaSendFloat(gimbal_.motor_yaw_.GetNowAngle());
+        // debug_tools_.VofaSendFloat(gimbal_.GetYawNowAngleNoncumulative());
+        debug_tools_.VofaSendFloat(gimbal_.GetNowPitchAngle());
         // 调试帧尾部
         debug_tools_.VofaSendTail();
 
@@ -193,6 +201,7 @@ void Robot::Task()
         supercap_.SetPowerLimitMax(100);
         supercap_.SetChargePower(50);
         
+
         mcu_comm_data_local_pre = mcu_comm_data_local;
 
         osDelay(pdMS_TO_TICKS(1));// 1khz

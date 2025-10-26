@@ -44,6 +44,8 @@ public:
     Imu imu_;
     // 云台yaw轴角度环pid
     Pid yaw_angle_pid_;
+    // 云台pitch轴角度环pid
+    Pid pitch_angle_pid_;
 
     /**
      * @brief 机器人初始化

@@ -16,7 +16,7 @@
 void Gimbal::Init()
 {
     // 6220电机初始化
-    motor_yaw_.Init(&hfdcan3, 0x12, 0x01);
+    motor_yaw_.Init(&hfdcan3, 0x12, 0x01,MOTOR_DM_CONTROL_METHOD_NORMAL_MIT,3.14159f);
     motor_pitch_.Init(&hfdcan3, 0x11, 0x02);
 
     motor_yaw_.CanSendClearError();
@@ -28,7 +28,7 @@ void Gimbal::Init()
     // motor_yaw_.SetKp(0);
     motor_yaw_.SetKp(0); //MIT模式kp
     // motor_pitch_.SetKp(3); // 3
-    motor_pitch_.SetKp(26);//25
+    motor_pitch_.SetKp(0);//26
 
     motor_yaw_.SetKd(0.05); // MIT模式kd
     // motor_pitch_.SetKd(0.03);

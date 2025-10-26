@@ -59,6 +59,8 @@ float math_int_to_float(int32_t x, int32_t int_min, int32_t int_max, float float
 
 float get_relative_angle_pm_pi(float now_angle_cum, float zero_angle);
 
+float normalize_angle_diff(float target, float now);
+
 /**
  * @brief 限幅函数
  *

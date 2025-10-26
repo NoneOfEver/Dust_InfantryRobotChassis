@@ -230,4 +230,14 @@ float get_relative_angle_pm_pi(float now_angle_cum, float zero_angle)
     return rel;
 }
 
+float normalize_angle_diff(float target, float now)
+{
+    float error = target - now;
+    if (error > M_PI)
+        error -= 2.0f * M_PI;
+    else if (error < -M_PI)
+        error += 2.0f * M_PI;
+    return error;
+}
+
 /************************ COPYRIGHT(C) HNUST-DUST **************************/
