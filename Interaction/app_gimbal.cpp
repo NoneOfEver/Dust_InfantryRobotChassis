@@ -32,16 +32,16 @@ void Gimbal::Init()
 
     motor_yaw_.SetKd(0.05); // MIT模式kd
     // motor_pitch_.SetKd(0.03);
-    motor_pitch_.SetKd(0.028);//0.06
+    motor_pitch_.SetKd(0.05);//0.06
 
     // motor_yaw_.SetControlAngle(0);
     // motor_pitch_.SetControlAngle(-0.3);
 
     motor_yaw_.SetControlOmega(0);
-    motor_pitch_.SetControlOmega(45);
+    motor_pitch_.SetControlOmega(0);
 
     // motor_yaw_.SetControlTorque(0.2);
-    motor_pitch_.SetControlTorque(0.1);
+    // motor_pitch_.SetControlTorque(0.1);
 
     motor_yaw_.Output();
     // osDelay(pdMS_TO_TICKS(10));
@@ -74,6 +74,9 @@ void Gimbal::SelfResolution()
         yaw_relative_zero_angle_ = get_relative_angle_pm_pi(now_yaw_angle_, yaw_zero_angle_);
     }
     yaw_now_angle_noncumulative_ = motor_yaw_.GetNowAngleNoncumulative();
+
+    now_pitch_omega_ = motor_pitch_.GetNowOmega();
+    now_yaw_omega_   = motor_yaw_.GetNowOmega();
     // yaw_angle_pid_.SetNow(now_yaw_angle_);
     // yaw_angle_pid_.CalculatePeriodElapsedCallback();
     // target_yaw_omega_ = yaw_angle_pid_.GetOut();
@@ -103,8 +106,8 @@ void Gimbal::Output()
 
     motor_yaw_.SetControlOmega(target_yaw_omega_);
     // motor_pitch_.SetControlAngle(target_pitch_angle_);
-    motor_pitch_.SetControlAngle(pitch_angle_interpolation.Output());
-
+    // motor_pitch_.SetControlAngle(pitch_angle_interpolation.Output());
+    motor_pitch_.SetControlOmega(target_pitch_omega_);
     motor_yaw_.Output();
     motor_pitch_.Output();
 

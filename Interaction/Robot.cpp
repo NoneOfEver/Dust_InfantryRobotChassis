@@ -63,7 +63,7 @@ void Robot::Init()
         15.0f
     );
     //pitch轴角度环PID初始化
-    pitch_angle_pid_.Init(0.08f,0.0f,0.0f,0.0f,0.0f,45.0f,0.001f);
+    pitch_angle_pid_.Init(120.0f,0.0f,0.000001f,0.0f,0.0f,0.0f,0.001f);
     // 云台初始化
     gimbal_.Init();
     // 底盘初始化
@@ -114,11 +114,14 @@ void Robot::Task()
         yaw_angle_pid_.SetNow(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
         yaw_angle_pid_.CalculatePeriodElapsedCallback();
 
+        pitch_angle_pid_.SetTarget((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
+        pitch_angle_pid_.SetNow(gimbal_.GetNowPitchAngle());
+        pitch_angle_pid_.CalculatePeriodElapsedCallback();
         // 遥控模式
         // gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f) * 3.0f / 128.0f);
         // gimbal_.SetTargetYawOmega(-(yaw_angle_pid_.GetOut() + gimbal_.GetYawOmegaFeedforword())); //补偿速度可能符号错了
         // gimbal_.SetTargetPitchAngle((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
-
+        gimbal_.SetTargetPitchOmega(pitch_angle_pid_.GetOut());
         /********************** 底盘 ***********************/ 
         // if((mcu_comm_data_local.chassis_spin == CHASSIS_SPIN_DISABLE) && 
         //    (chassis_spin_ramp_source.is_completed == 1)) 
@@ -169,10 +172,13 @@ void Robot::Task()
 
 
         /********************** 调试信息 ***********************/   
-        debug_tools_.VofaSendFloat(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
+        // debug_tools_.VofaSendFloat(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
         // debug_tools_.VofaSendFloat(virtual_angle_);
         // debug_tools_.VofaSendFloat(gimbal_.motor_yaw_.GetNowAngle());
         // debug_tools_.VofaSendFloat(gimbal_.GetYawNowAngleNoncumulative());
+        // debug_tools_.VofaSendFloat(pitch_angle_pid_.GetOut());
+        // debug_tools_.VofaSendFloat(gimbal_.GetNowPitchOmega());
+        debug_tools_.VofaSendFloat((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
         debug_tools_.VofaSendFloat(gimbal_.GetNowPitchAngle());
         // 调试帧尾部
         debug_tools_.VofaSendTail();
