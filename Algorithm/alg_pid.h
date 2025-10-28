@@ -68,6 +68,8 @@ public:
 
     void CalculatePeriodElapsedCallback();
 
+    void CalculateAnglePid();
+
 protected:
     //初始化相关常量
 

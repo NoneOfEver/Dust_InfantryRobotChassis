@@ -205,7 +205,7 @@ public:
             MotorDmControlMethod motor_dm_control_method =
                 MOTOR_DM_CONTROL_METHOD_NORMAL_MIT,
             float angle_max = 12.5f,
-            float omega_max = 25.0f,
+            float omega_max = 45.0f,
             float torque_max = 10.0f,
             float current_max = 10.261194f
             );

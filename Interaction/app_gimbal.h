@@ -78,6 +78,10 @@ public:
     {
         return yaw_now_angle_noncumulative_;
     }
+    float GetPitchNowAngleNoncumulative()
+    {
+        return pitch_now_angle_noncumulative_;
+    }
     inline void SetTargetYawAngle(float target_yaw_angle);
 
     inline void SetTargetPitchAngle(float target_pitch_angle);
@@ -145,6 +149,8 @@ protected:
 
     // yaw轴电机非累计角度 rad
     float yaw_now_angle_noncumulative_ = 0.0f;
+     // pitch轴电机非累计角度 rad
+    float pitch_now_angle_noncumulative_ = 0.0f;
     void SelfResolution();
     void MotorNearestTransposition();
     void Output();

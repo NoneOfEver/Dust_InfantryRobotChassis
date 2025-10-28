@@ -239,5 +239,20 @@ float normalize_angle_diff(float target, float now)
         error += 2.0f * M_PI;
     return error;
 }
+/**
+ * @brief 计算云台yaw轴角度误差（考虑跨零与跨π情况）
+ * @param target 目标角度（单位：rad，范围 -π~π）
+ * @param now 当前角度（单位：rad，范围 -π~π）
+ * @return 劣弧方向的角度误差（范围 -π~π）
+ */
+float CalcYawError(float target, float now)
+{
+    float err = target - now;
 
+    // 角度归一化到 (-π, π]
+    while (err > PI)  err -= 2.0f * PI;
+    while (err < -PI) err += 2.0f * PI;
+
+    return err;
+}
 /************************ COPYRIGHT(C) HNUST-DUST **************************/

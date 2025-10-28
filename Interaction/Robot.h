@@ -55,7 +55,9 @@ public:
     void Task();
 protected:
     // 操作手控制的的虚拟角度
-    float virtual_angle_ = 0;
+    float virtual_yaw_angle_ = 0;
+    float virtual_pitch_angle_ = 0;
+    
     // 小陀螺功能状态
     RobotGyroscopeType chassis_gyroscope_mode_status_ = ROBOT_GYROSCOPE_TYPE_DISABLE;
     // 底盘跟随模式是否使能
