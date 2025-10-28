@@ -21,6 +21,8 @@ void Gimbal::Init()
 
     motor_yaw_.CanSendClearError();
     motor_pitch_.CanSendClearError();
+    osDelay(100);
+    motor_yaw_.CanSendSaveZero();
     osDelay(1000);
     motor_yaw_.CanSendEnter();
     motor_pitch_.CanSendEnter();

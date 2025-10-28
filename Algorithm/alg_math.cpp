@@ -255,4 +255,15 @@ float CalcYawError(float target, float now)
 
     return err;
 }
+
+float normalize_angle_pm_pi(float angle)
+{
+    float m = fmod(angle, 2.0f * M_PI);
+    if (m > M_PI){
+        m -= 2.0f * M_PI;
+    }else if(m < -M_PI){
+        m += 2.0f * M_PI;
+    }
+    return m;
+};
 /************************ COPYRIGHT(C) HNUST-DUST **************************/

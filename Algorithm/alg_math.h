@@ -62,6 +62,7 @@ float get_relative_angle_pm_pi(float now_angle_cum, float zero_angle);
 float normalize_angle_diff(float target, float now);
 float CalcYawError(float target, float now);
 
+float normalize_angle_pm_pi(float angle);
 /**
  * @brief 限幅函数
  *

@@ -33,18 +33,24 @@ public:
                  motor_chassis_4_;
     void Init();
     void Task();
-    inline void SetTargetVelocityX(float target_velocity_x);
-    inline void SetTargetVelocityY(float target_velocity_y);
+    inline void SetTargetVxInGimbal(float target_vx);
+    inline void SetTargetVyInGimbal(float target_vy);
     inline void SetTargetVelocityRotation(float target_velocity_rotation);
+    inline void SetYawAngle(float yaw_angle);
 protected:
-    // 目标速度X
-    float target_velocity_x_ = 0.0f;
-    // 目标速度Y
-    float target_velocity_y_ = 0.0f;
+    // 云台坐标系目标速度
+    float target_vx_in_gimbal_ = 0.0f;
+    float target_vy_in_gimbal_ = 0.0f;
+    // 底盘坐标系目标速度
+    float target_vx_in_chassis_ = 0.0f;
+    float target_vy_in_chassis_ = 0.0f;
     // 目标速度 旋转
     float target_velocity_rotation_ = 0.0f;
+    // 云台相对于底盘的偏航角（逆时针为正）
+    float yaw_angle_ = 0.0f; 
 
     void KinematicsInverseResolution();
+    void RotationMatrixTransform();
     void OutputToMotor();
     static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
 };
@@ -54,9 +60,9 @@ protected:
  *
  * @param target_velocity_x 目标速度X
  */
-inline void Chassis::SetTargetVelocityX(float target_velocity_x)
+inline void Chassis::SetTargetVxInGimbal(float target_vx)
 {
-    target_velocity_x_ = target_velocity_x;
+    target_vx_in_gimbal_ = target_vx;
 }
 
 /**
@@ -64,9 +70,9 @@ inline void Chassis::SetTargetVelocityX(float target_velocity_x)
  *
  * @param target_velocity_y 目标速度Y
  */
-inline void Chassis::SetTargetVelocityY(float target_velocity_y)
+inline void Chassis::SetTargetVyInGimbal(float target_vy)
 {
-    target_velocity_y_ = target_velocity_y;
+    target_vy_in_gimbal_ = target_vy;
 }
 
 /**
@@ -79,5 +85,9 @@ inline void Chassis::SetTargetVelocityRotation(float target_velocity_rotation)
     target_velocity_rotation_ = target_velocity_rotation;
 }
 
+inline void Chassis::SetYawAngle(float yaw_angle)
+{
+    yaw_angle_ = yaw_angle;
+}
 
 #endif // !APP_CHASSIS_H_

@@ -9,7 +9,7 @@
 #include "supercap.h"
 #include "debug_tools.h"
 
-#define YAW_SENSITIVITY     0.001F
+#define YAW_SENSITIVITY     0.00005F
 
 /**
  * @brief 小陀螺类型
