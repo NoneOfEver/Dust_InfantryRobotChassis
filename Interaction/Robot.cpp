@@ -64,9 +64,9 @@ void Robot::Init()
     //     15.0f
     // );
     yaw_angle_pid_.Init(
-        130.0f,
-        40.0f,
-        2.5f,
+        50.0f,
+        0.1f,
+        1.0f,
         44.0f,
         0.0f,
         44.0f,
@@ -74,12 +74,12 @@ void Robot::Init()
         0.0f,
         0.0f,
         0.0f,
-        0.0f    
+        0.0f  
     );
 
     //pitch轴角度环PID初始化
     pitch_angle_pid_.Init(
-        550.0f,
+        350.0f,
         160.0f,
         2.0f,
         44.0f,
@@ -95,7 +95,7 @@ void Robot::Init()
     gimbal_.Init();
     // 底盘初始化
     chassis_.Init();
-    ramp_init(&chassis_spin_ramp_source, 0.0005f, 10.0f, -10.0f);
+    ramp_init(&chassis_spin_ramp_source, 0.0005f, 30.0f, -30.0f);
     // 超级电容初始化
     supercap_.Init(&hfdcan3, 0x100, 0x003);
 
@@ -173,46 +173,51 @@ void Robot::Task()
         // chassis_follow_pid_.SetNow(adjusted_now);
         // chassis_follow_pid_.CalculatePeriodElapsedCallback();
 
-        chassis_.SetTargetVxInGimbal((mcu_comm_data_local.chassis_speed_x - 127.0f) * 10.0f / 128.0f); //9
-        chassis_.SetTargetVyInGimbal((127.0f - mcu_comm_data_local.chassis_speed_y ) * 10.0f / 128.0f); //9
+        chassis_.SetTargetVxInGimbal((mcu_comm_data_local.chassis_speed_x - 127.0f) * 15.0f / 128.0f); //9
+        chassis_.SetTargetVyInGimbal((127.0f - mcu_comm_data_local.chassis_speed_y ) * 15.0f / 128.0f); //9
         chassis_.SetYawAngle(-normalize_angle_pm_pi(gimbal_.GetNowYawAngle()/0.8f));
         // chassis_.SetTargetVelocityRotation(((127.0f - mcu_comm_data_local.chassis_rotation ) * 9.0f / 128.0f)-chassis_follow_pid_.GetOut());
         // gimbal_.SetYawOmegaFeedforword(-0.9f*chassis_follow_pid_.GetOut());
-        chassis_.SetTargetVelocityRotation(((127.0f - mcu_comm_data_local.chassis_rotation ) * 10.0f / 128.0f));
+        chassis_.SetTargetVelocityRotation(((127.0f - mcu_comm_data_local.chassis_rotation ) * 15.0f / 128.0f));
     
 
         /********************** 小陀螺 ***********************/   
         switch(mcu_comm_data_local.chassis_spin)
         {
             case CHASSIS_SPIN_CLOCKWISE:
-                ramp_temp = ramp_calc(&chassis_spin_ramp_source,10.0f);
+                ramp_temp = ramp_calc(&chassis_spin_ramp_source,30.0f);
                 chassis_.SetTargetVelocityRotation(ramp_temp);
-                gimbal_.SetYawOmegaFeedforword(0.578f * ramp_temp);
+                gimbal_.SetYawOmegaFeedforword(0.445f * ramp_temp);
                 // gimbal_.SetTargetYawOmega(0.578f*ramp_temp);
                 gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f)*0.01f + gimbal_.GetYawOmegaFeedforword()); //补偿速度可能符号错了
             break;
             case CHASSIS_SPIN_DISABLE:
                 chassis_spin_ramp_source.out = 0.0f; // 清零
                 if(mcu_comm_data_local_pre.chassis_spin == CHASSIS_SPIN_CLOCKWISE){
-                    ramp_temp = ramp_calc(&chassis_spin_ramp_source,-10.0f) + chassis_spin_ramp_source.max_value;
+                    ramp_temp = ramp_calc(&chassis_spin_ramp_source,-30.0f) + chassis_spin_ramp_source.max_value;
                     chassis_.SetTargetVelocityRotation(ramp_temp);
-                    gimbal_.SetYawOmegaFeedforword(0.578f * ramp_temp);
-                    // gimbal_.SetTargetYawOmega(ramp_temp*0.578f);
-                }else if(mcu_comm_data_local_pre.chassis_spin == CHASSIS_SPIN_COUNTER_CLOCK_WISE){
-                    ramp_temp = ramp_calc(&chassis_spin_ramp_source,10.0f) - chassis_spin_ramp_source.max_value;
-                    chassis_.SetTargetVelocityRotation(ramp_temp);
-                    gimbal_.SetYawOmegaFeedforword(0.578f * ramp_temp);
+                    gimbal_.SetYawOmegaFeedforword(0.445f * ramp_temp);
                     // gimbal_.SetTargetYawOmega(ramp_temp*0.578f);
                 }
+                // else if(mcu_comm_data_local_pre.chassis_spin == CHASSIS_SPIN_COUNTER_CLOCK_WISE){
+                //     ramp_temp = ramp_calc(&chassis_spin_ramp_source,10.0f) - chassis_spin_ramp_source.max_value;
+                //     chassis_.SetTargetVelocityRotation(ramp_temp);
+                //     gimbal_.SetYawOmegaFeedforword(0.578f * ramp_temp);
+                //     // gimbal_.SetTargetYawOmega(ramp_temp*0.578f);
+                // }
                 gimbal_.SetTargetYawOmega(-(yaw_angle_pid_.GetOut())); //补偿速度可能符号错了
-
             break;
             case CHASSIS_SPIN_COUNTER_CLOCK_WISE:
-                ramp_temp = ramp_calc(&chassis_spin_ramp_source,-10.0f);
-                chassis_.SetTargetVelocityRotation(ramp_temp);
-                gimbal_.SetYawOmegaFeedforword(0.578f * ramp_temp);
-                // gimbal_.SetTargetYawOmega(ramp_temp*0.578f);
-                gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f)*0.01f + gimbal_.GetYawOmegaFeedforword()); //补偿速度可能符号错了
+                // ramp_temp = ramp_calc(&chassis_spin_ramp_source,-10.0f);
+                // chassis_.SetTargetVelocityRotation(ramp_temp);
+                // gimbal_.SetYawOmegaFeedforword(0.578f * ramp_temp);
+                // // gimbal_.SetTargetYawOmega(ramp_temp*0.578f);
+                // gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f)*0.01f + gimbal_.GetYawOmegaFeedforword()); //补偿速度可能符号错了
+                chassis_.SetTargetVxInGimbal(0.0f); //9
+                chassis_.SetTargetVyInGimbal(0.0f); //9
+                chassis_.SetTargetVelocityRotation(0.0f);
+                gimbal_.motor_yaw_.CanSendExit();
+                gimbal_.motor_pitch_.CanSendExit();
             break;
             default:
             // do nothing

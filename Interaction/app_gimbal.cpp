@@ -33,7 +33,7 @@ void Gimbal::Init()
     // motor_pitch_.SetKp(3); // 3
     motor_pitch_.SetKp(0);//26
 
-    motor_yaw_.SetKd(0.04f); // MIT模式kd
+    motor_yaw_.SetKd(0.06f); // MIT模式kd
     // motor_pitch_.SetKd(0.03);
     motor_pitch_.SetKd(0.06f);//0.06
 
