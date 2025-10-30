@@ -13,12 +13,10 @@
 
 // app
 #include "app_chassis.h"
-#include "math.h"
 #include "user_lib.h"
 #include "alg_math.h"
 // module
 #include "dvc_mcu_comm.h"
-#include "imu.hpp"
 #include "debug_tools.h"
 
 // bsp
@@ -30,8 +28,8 @@ void Robot::Init()
     // 上下板通讯组件初始化
     mcu_comm_.Init(&hfdcan2, 0x01, 0x00);
     // 陀螺仪初始化
-    imu_.Init();
-    osDelay(pdMS_TO_TICKS(10000));// 10s时间等待陀螺仪收敛
+    // imu_.Init();
+    // osDelay(pdMS_TO_TICKS(10000));// 10s时间等待陀螺仪收敛
 
     // 底盘跟随控制PID初始化  17.0f,0.0f,0.0f,5.0f,0.0f,6.0f,0.001f,0.0f,0.0f,0.0f,0.0f
     chassis_follow_pid_.Init(
@@ -185,19 +183,21 @@ void Robot::Task()
         switch(mcu_comm_data_local.chassis_spin)
         {
             case CHASSIS_SPIN_CLOCKWISE:
-                ramp_temp = ramp_calc(&chassis_spin_ramp_source,30.0f);
-                chassis_.SetTargetVelocityRotation(ramp_temp);
-                gimbal_.SetYawOmegaFeedforword(0.445f * ramp_temp);
-                // gimbal_.SetTargetYawOmega(0.578f*ramp_temp);
+                // ramp_temp = ramp_calc(&chassis_spin_ramp_source,30.0f);
+                // chassis_.SetTargetVelocityRotation(ramp_temp);
+                // gimbal_.SetYawOmegaFeedforword(0.445f * ramp_temp);
+                chassis_.SetTargetVelocityRotation(30.0f);
+                gimbal_.SetYawOmegaFeedforword(0.40f * 30.0f);
                 gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f)*0.01f + gimbal_.GetYawOmegaFeedforword()); //补偿速度可能符号错了
             break;
             case CHASSIS_SPIN_DISABLE:
                 chassis_spin_ramp_source.out = 0.0f; // 清零
                 if(mcu_comm_data_local_pre.chassis_spin == CHASSIS_SPIN_CLOCKWISE){
-                    ramp_temp = ramp_calc(&chassis_spin_ramp_source,-30.0f) + chassis_spin_ramp_source.max_value;
-                    chassis_.SetTargetVelocityRotation(ramp_temp);
-                    gimbal_.SetYawOmegaFeedforword(0.445f * ramp_temp);
-                    // gimbal_.SetTargetYawOmega(ramp_temp*0.578f);
+                    // ramp_temp = ramp_calc(&chassis_spin_ramp_source,-30.0f) + chassis_spin_ramp_source.max_value;
+                    // chassis_.SetTargetVelocityRotation(ramp_temp);
+                    // gimbal_.SetYawOmegaFeedforword(0.445f * ramp_temp);
+                    chassis_.SetTargetVelocityRotation(0.0f);
+                    gimbal_.SetYawOmegaFeedforword(0.0f);
                 }
                 // else if(mcu_comm_data_local_pre.chassis_spin == CHASSIS_SPIN_COUNTER_CLOCK_WISE){
                 //     ramp_temp = ramp_calc(&chassis_spin_ramp_source,10.0f) - chassis_spin_ramp_source.max_value;
