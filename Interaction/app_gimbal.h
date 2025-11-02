@@ -82,6 +82,7 @@ public:
     {
         return pitch_now_angle_noncumulative_;
     }
+
     inline void SetTargetYawAngle(float target_yaw_angle);
 
     inline void SetTargetPitchAngle(float target_pitch_angle);
@@ -94,9 +95,20 @@ public:
     {
         yaw_omega_feedforword_ = yaw_omega_feedforword;
     }
+
     inline void SetPitchOmegaFeedforword(float pitch_omega_feedforword)
     {
         pitch_omega_feedforword_ = pitch_omega_feedforword;
+    }
+
+    inline void SetVirtualYawAngle(float virtual_yaw_angle)
+    {
+        virtual_yaw_angle_ = virtual_yaw_angle;
+    }
+
+    inline void SetVirtualPitchAngle(float virtual_pitch_angle)
+    {
+        virtual_pitch_angle_ = virtual_pitch_angle;
     }
 
 protected:
@@ -149,12 +161,18 @@ protected:
 
     // yaw轴电机非累计角度 rad
     float yaw_now_angle_noncumulative_ = 0.0f;
-     // pitch轴电机非累计角度 rad
+    // pitch轴电机非累计角度 rad
     float pitch_now_angle_noncumulative_ = 0.0f;
+
+    // yaw轴虚拟轴角度
+    float virtual_yaw_angle_ = 0.0f;
+    // pitch轴虚拟轴角度
+    float virtual_pitch_angle_ = 0.0f;
+
     void SelfResolution();
     void MotorNearestTransposition();
     void Output();
-    static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
+    static void TaskEntry(void *param);
 };
 
 /**

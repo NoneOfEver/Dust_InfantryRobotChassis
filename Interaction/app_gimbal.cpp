@@ -141,14 +141,13 @@ void Gimbal::MotorNearestTransposition()
     // tmp_delta_angle = target_pitch_angle_ - now_pitch_angle_;
     // target_pitch_angle_ = -motor_pitch_.GetNowAngle() + tmp_delta_angle;
 }
-// 任务入口（静态函数）—— osThreadNew 需要这个原型
+
 void Gimbal::TaskEntry(void *argument)
 {
-    Gimbal *self = static_cast<Gimbal *>(argument);  // 还原 this 指针
-    self->Task();  // 调用成员函数
+    Gimbal *self = static_cast<Gimbal *>(argument);
+    self->Task();  
 }
 
-// 实际任务逻辑（无限循环）
 void Gimbal::Task()
 {
     uint8_t first_run_flag = 0; // 用于标记是否是第一次运行
