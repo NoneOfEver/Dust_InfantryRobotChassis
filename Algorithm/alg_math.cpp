@@ -265,5 +265,14 @@ float normalize_angle_pm_pi(float angle)
         m += 2.0f * M_PI;
     }
     return m;
-};
+}
+
+float slew_limit(float cmd, float prev, float dt, float max_rate) 
+{
+    float maxd = max_rate * dt;
+    float d = cmd - prev;
+    if (d > maxd) d = maxd;
+    else if (d < -maxd) d = -maxd;
+    return prev + d;
+}
 /************************ COPYRIGHT(C) HNUST-DUST **************************/

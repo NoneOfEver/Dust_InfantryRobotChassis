@@ -9,7 +9,15 @@
 #include "supercap.h"
 #include "debug_tools.h"
 
-#define YAW_SENSITIVITY     0.00008F//0.00005
+#define YAW_SENSITIVITY         0.00015F//0.00008
+#define YAW_SPEED_SENSITIVITY   0.05f
+#define PITCH_RANGE_MAX         0.3f
+
+#define CHASSIS_SPEED           15.0f
+#define CHASSIS_SPIN_SPEED      30.0f
+
+#define YAW_GEAR_RATIO          0.8f
+#define YAW_FEEDFORWORD_RATIO   0.19f
 
 /**
  * @brief 小陀螺类型
@@ -43,14 +51,7 @@ public:
     Supercap supercap_;
     // 底盘陀螺仪
     Imu imu_;
-    // 云台yaw轴角度环pid
-    Pid yaw_angle_pid_;
-    // 云台pitch轴角度环pid
-    Pid pitch_angle_pid_;
 
-    /**
-     * @brief 机器人初始化
-     */
     void Init();
     void Task();
 protected:
@@ -64,7 +65,7 @@ protected:
     bool chassis_follow_mode_status_ = true;
     // 机器人等级
     int32_t robot_level_ = 1;
-    static void TaskEntry(void *param);  // FreeRTOS 入口，静态函数
+    static void TaskEntry(void *param);
 };
 
 #endif // !APP_ROBOT_H_

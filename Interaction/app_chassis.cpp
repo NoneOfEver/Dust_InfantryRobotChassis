@@ -1,11 +1,10 @@
 // app
+#include "FreeRTOS.h"
 #include "app_chassis.h"
 #include "ins_task.h"
 #include "bmi088driver.h"
 #include "imu.hpp"
-//bsp
-#include "spi.h"
-#include "tim.h"
+
 
 void Chassis::Init()
 {
@@ -30,15 +29,21 @@ void Chassis::Init()
         .stack_size = 512,
         .priority = (osPriority_t) osPriorityNormal
     };
-    // 启动任务，将 this 传入
     osThreadNew(Chassis::TaskEntry, this, &kChassisTaskAttr);
 }
 void Chassis::TaskEntry(void *argument)
 {
-    Chassis *self = static_cast<Chassis *>(argument);  // 还原 this 指针
-    self->Task();  // 调用成员函数
+    Chassis *self = static_cast<Chassis *>(argument);
+    self->Task();
 }
 
+void Chassis::Exit()
+{
+    motor_chassis_1_.SetTargetOmega(0.0f);
+    motor_chassis_2_.SetTargetOmega(0.0f);
+    motor_chassis_3_.SetTargetOmega(0.0f);
+    motor_chassis_4_.SetTargetOmega(0.0f);
+}
 /**
  * @brief 云台系速度 → 底盘系速度 旋转变换
  * @param yaw_angle 云台相对于底盘的偏航角（逆时针为正）

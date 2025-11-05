@@ -11,16 +11,11 @@
 #ifndef APP_GIMBAL_H
 #define APP_GIMBAL_H
 
-#include "FreeRTOS.h"
 // module
 #include "dvc_motor_dm.h"
 #include "interpolation.hpp"
-// bsp
-#include "bsp_log.h"
-#include "bsp_usb.h"
-#include "cmsis_os2.h"
-#include "bsp_usart.h"
-#include "bsp_can.h"
+#include "low_pass_filter.hpp"
+
 
 /**
  * @brief 云台控制类型
@@ -30,7 +25,11 @@ enum GimbalControlType
 {
     GIMBAL_CONTROL_TYPE_MANUAL = 0,
     GIMBAL_CONTROL_TYPE_AUTOAIM,
+    GIMBAL_CONTROL_TYPE_OMEGA, // 角速度控制模式
+    GIMBAL_CONTROL_TYPE_ANGLE, // 角度控制模式
 };
+
+
 
 class Gimbal
 {
@@ -41,9 +40,21 @@ public:
 
     Interpolation pitch_angle_interpolation; // pitch角插补类实例
 
-    void Init();
+    // 云台yaw轴角度环pid
+    Pid yaw_angle_pid_;
+    // 云台pitch轴角度环pid
+    Pid pitch_angle_pid_;
+    // 云台yaw轴速度环pid
+    Pid yaw_omega_pid_;
+    // 云台pitch轴速度环pid
+    Pid pitch_omega_pid_;
 
+    LowPassFilter yaw_omega_filter_;
+    LowPassFilter pitch_omega_filter_;
+
+    void Init();
     void Task();
+    void Exit();
 
     inline float GetNowYawAngle();
 
@@ -53,6 +64,15 @@ public:
 
     inline float GetNowPitchOmega();
 
+    inline float GetNowYawTorque()
+    {
+        return now_yaw_torque_;
+    }
+
+    inline float GetNowPitchTorque()
+    {
+        return now_pitch_torque_;
+    }
     inline float GetTargetYawAngle();
 
     inline float GetTargetPitchAngle();
@@ -65,10 +85,12 @@ public:
     {
         return yaw_omega_feedforword_;
     }
+
     inline float GetPitchOmegaFeedforword()
     {
         return pitch_omega_feedforword_;
     }
+
     float GetYawRelativeZeroAngle()
     {
         return yaw_relative_zero_angle_;
@@ -78,6 +100,7 @@ public:
     {
         return yaw_now_angle_noncumulative_;
     }
+
     float GetPitchNowAngleNoncumulative()
     {
         return pitch_now_angle_noncumulative_;
@@ -90,6 +113,16 @@ public:
     inline void SetTargetYawOmega(float target_yaw_omega);
 
     inline void SetTargetPitchOmega(float target_pitch_omega);
+
+    inline void SetTargetYawTorque(float torque)
+    {
+        target_yaw_torque_ = torque;
+    }
+
+    inline void SetTargetPitchTorque(float torque)
+    {
+        target_pitch_torque_ = torque;
+    }
 
     inline void SetYawOmegaFeedforword(float yaw_omega_feedforword)
     {
@@ -110,6 +143,17 @@ public:
     {
         virtual_pitch_angle_ = virtual_pitch_angle;
     }
+    
+    inline void SetGimbalYawControlType(GimbalControlType gimbal_control_type)
+    {
+        yaw_control_type_ = gimbal_control_type;
+    }
+
+    inline void SetGimbalPitchControlType(GimbalControlType gimbal_control_type)
+    {
+        pitch_control_type_ = gimbal_control_type;
+    }
+
 
 protected:
     // pitch轴最小值
@@ -117,10 +161,8 @@ protected:
     // pitch轴最大值
     float max_pitch_angle_ = 0.50f;
 
-    float pre_pitch_angle_ = 0.0f; // 用于pitch角的插补算法
-    // 内部变量
-
-    // 读变量
+    // 用于pitch角的插补算法
+    float pre_pitch_angle_ = 0.0f; 
 
     // yaw轴当前角度
     float now_yaw_angle_ = 0.0f;
@@ -132,12 +174,16 @@ protected:
     // pitch轴当前角速度
     float now_pitch_omega_ = 0.0f;
 
-    // 写变量
+    // yaw轴当前力矩
+    float now_yaw_torque_ = 0.0f;
+    // pitch轴当前力矩
+    float now_pitch_torque_ = 0.0f;
 
     // 云台状态
     GimbalControlType gimbal_control_type_ = GIMBAL_CONTROL_TYPE_MANUAL;
-    // 读写变量
-
+    GimbalControlType yaw_control_type_ = GIMBAL_CONTROL_TYPE_ANGLE;
+    GimbalControlType pitch_control_type_ = GIMBAL_CONTROL_TYPE_ANGLE;
+    
     // yaw轴目标角度
     float target_yaw_angle_ = 0.0f;
     // pitch轴目标角度
@@ -147,6 +193,11 @@ protected:
     float target_yaw_omega_ = 0.0f;
     // pitch轴目标角速度
     float target_pitch_omega_ = 0.0f;
+
+    // yaw轴目标力矩
+    float target_yaw_torque_ = 0.0f;
+    //pitch轴目标力矩
+    float target_pitch_torque_ = 0.0f;
 
     // yaw轴角速度前馈
     float yaw_omega_feedforword_ = 0.0f;

@@ -35,7 +35,9 @@ void Pid::Init(
     float i_variable_speed_A, 
     float i_variable_speed_B, 
     float i_separate_threshold, 
-    enum DFirst d_first)
+    enum DFirst d_first,
+    float d_lpf_tau
+)
 {
     k_p_ = k_p;
     k_i_ = k_i;
@@ -49,6 +51,7 @@ void Pid::Init(
     i_variable_speed_B_ = i_variable_speed_B;
     i_separate_threshold_ = i_separate_threshold;
     d_first_ = d_first;
+    d_lpf_tau_ = d_lpf_tau;
 }
 
 /**
@@ -213,6 +216,9 @@ void Pid::CalculatePeriodElapsedCallback()
     // 线性变速积分
     float speed_ratio;
 
+    float d_raw;  // 未滤波的微分信号
+    float alpha;  // 滤波系数
+    
     error = target_ - now_;
     abs_error = math_abs(error);
 
@@ -291,13 +297,24 @@ void Pid::CalculatePeriodElapsedCallback()
 
     if (d_first_ == PID_D_First_DISABLE)
     {
-        // 没有微分先行
-        d_out = k_d_ * (error - pre_error_) / d_t_;
+        d_raw = k_d_ * (error - pre_error_) / d_t_;
     }
     else
     {
-        // 微分先行使能
-        d_out = -k_d_ * (now_ - pre_now_) / d_t_;
+        d_raw = -k_d_ * (now_ - pre_now_) / d_t_;
+    }
+
+    // 一阶低通滤波器: y_k = α*y_{k-1} + (1-α)*x_k
+    if (d_lpf_tau_ > 0.0f)
+    {
+        alpha = d_lpf_tau_ / (d_lpf_tau_ + d_t_);
+        d_out = alpha * d_lpf_output_ + (1.0f - alpha) * d_raw;
+        d_lpf_output_ = d_out;  // 更新滤波输出缓存
+    }
+    else
+    {
+        // 没设滤波常数则直接用原始值
+        d_out = d_raw;
     }
 
     // 计算前馈

@@ -47,7 +47,8 @@ public:
               float i_variable_apeed_A = 0.0f, 
               float i_variable_speed_B = 0.0f, 
               float i_separate_threshold = 0.0f, 
-              DFirst d_first = PID_D_First_DISABLE
+              DFirst d_first = PID_D_First_DISABLE,
+              float d_lpf_tau = 0.0f
             );
 
     float GetIntegralError();
@@ -79,6 +80,9 @@ protected:
     float dead_zone_;
     //微分先行
     DFirst d_first_;
+    // d的低通滤波系数
+    float d_lpf_tau_;
+    float d_lpf_output_;
 
     //常量
 

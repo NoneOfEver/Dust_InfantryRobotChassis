@@ -13,7 +13,6 @@
 
 // app
 #include "app_chassis.h"
-#include "user_lib.h"
 #include "alg_math.h"
 // module
 #include "dvc_mcu_comm.h"
@@ -45,34 +44,7 @@ void Robot::Init()
         0.0f,
         0.0f
     );
-    //yaw轴角度环PID初始化
-    yaw_angle_pid_.Init(
-        50.0f,
-        0.1f,
-        1.0f,
-        44.0f,
-        0.0f,
-        44.0f,
-        0.001f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f  
-    );
-    //pitch轴角度环PID初始化
-    pitch_angle_pid_.Init(
-        350.0f,
-        160.0f,
-        2.0f,
-        44.0f,
-        0.0f,
-        44.0f,
-        0.001f,
-        0.0f,
-        0.0f,
-        0.0f,
-        0.0f
-    );
+    
     // 云台初始化
     gimbal_.Init();
     // 底盘初始化
@@ -100,21 +72,11 @@ void Robot::TaskEntry(void *argument)
     self->Task();
 }
 
-float slew_limit(float cmd, float prev, float dt, float max_rate) {
-    float maxd = max_rate * dt;
-    float d = cmd - prev;
-    if (d > maxd) d = maxd;
-    else if (d < -maxd) d = -maxd;
-    return prev + d;
-}
-
 void Robot::Task()
 {
     McuCommData mcu_comm_data_local;
     McuCommData mcu_comm_data_local_pre;
     uint8_t first_flag = 0;
-    float error = 0.0f;
-    float adjusted_now = 0.0f;
     for (;;)
     {
         __disable_irq();
@@ -128,70 +90,46 @@ void Robot::Task()
         /********************** 云台 ***********************/   
         virtual_yaw_angle_ += (mcu_comm_data_local.yaw - 127.0f)*YAW_SENSITIVITY;
         // virtual_yaw_angle_ = (mcu_comm_data_local.yaw - 127.0f)*(M_PI/128.0f);
-        virtual_pitch_angle_ = (mcu_comm_data_local.pitch_angle - 127.0f)*(0.3f/128.0f);
-        if (virtual_pitch_angle_ >= 0.3f){
-            virtual_pitch_angle_ = 0.3f;
-        }else if(virtual_pitch_angle_ <= -0.3f){
-            virtual_pitch_angle_ = -0.3f;
+        virtual_pitch_angle_ = (mcu_comm_data_local.pitch_angle - 127.0f)*(PITCH_RANGE_MAX/128.0f);
+        if (virtual_pitch_angle_ >= PITCH_RANGE_MAX){
+            virtual_pitch_angle_ = PITCH_RANGE_MAX;
+        }else if(virtual_pitch_angle_ <= -PITCH_RANGE_MAX){
+            virtual_pitch_angle_ = -PITCH_RANGE_MAX;
         }
-        yaw_angle_pid_.SetTarget(0);
-        float yaw_err = CalcYawError(virtual_yaw_angle_, normalize_angle_pm_pi(gimbal_.GetNowYawAngle()/0.8f));
-        yaw_angle_pid_.SetNow(yaw_err);
-        yaw_angle_pid_.CalculatePeriodElapsedCallback();
 
-        pitch_angle_pid_.SetTarget(virtual_pitch_angle_);
-        pitch_angle_pid_.SetNow(gimbal_.GetPitchNowAngleNoncumulative());
-        pitch_angle_pid_.CalculatePeriodElapsedCallback();
-        gimbal_.SetTargetPitchOmega(pitch_angle_pid_.GetOut());
+        gimbal_.SetVirtualYawAngle(virtual_yaw_angle_);
+        gimbal_.SetVirtualPitchAngle(virtual_pitch_angle_);
         
 
         /********************** 底盘 ***********************/ 
-        chassis_.SetTargetVxInGimbal((mcu_comm_data_local.chassis_speed_x - 127.0f) * 15.0f / 128.0f); //9
-        chassis_.SetTargetVyInGimbal((127.0f - mcu_comm_data_local.chassis_speed_y ) * 15.0f / 128.0f); //9
-        chassis_.SetYawAngle(-normalize_angle_pm_pi(gimbal_.GetNowYawAngle()/0.8f));
-        chassis_.SetTargetVelocityRotation(((127.0f - mcu_comm_data_local.chassis_rotation ) * 15.0f / 128.0f));
+        chassis_.SetTargetVxInGimbal((mcu_comm_data_local.chassis_speed_x - 127.0f) * CHASSIS_SPEED / 128.0f); //9
+        chassis_.SetTargetVyInGimbal((127.0f - mcu_comm_data_local.chassis_speed_y ) * CHASSIS_SPEED / 128.0f); //9
+        chassis_.SetTargetVelocityRotation(((127.0f - mcu_comm_data_local.chassis_rotation ) * CHASSIS_SPEED / 128.0f));
+        chassis_.SetYawAngle(-normalize_angle_pm_pi(gimbal_.GetNowYawAngle()/YAW_GEAR_RATIO));
     
 
-        /********************** 小陀螺 ***********************/   
+        /********************** 模式切换 ***********************/   
         switch(mcu_comm_data_local.chassis_spin)
         {
             case CHASSIS_SPIN_CLOCKWISE:
-                chassis_.SetTargetVelocityRotation(30.0f);
-                gimbal_.SetYawOmegaFeedforword(0.40f * 30.0f);
-                gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f)*0.05f+gimbal_.GetYawOmegaFeedforword()); //补偿速度可能符号错了
+                chassis_.SetTargetVelocityRotation(CHASSIS_SPIN_SPEED);
+                gimbal_.SetGimbalYawControlType(GIMBAL_CONTROL_TYPE_OMEGA);
+                gimbal_.SetYawOmegaFeedforword(YAW_FEEDFORWORD_RATIO * CHASSIS_SPIN_SPEED);
+                gimbal_.SetTargetYawOmega((mcu_comm_data_local.yaw - 127.0f)*YAW_SPEED_SENSITIVITY); //补偿速度可能符号错了
             break;
             case CHASSIS_SPIN_DISABLE:
                 chassis_.SetTargetVelocityRotation(0.0f);
+                gimbal_.SetGimbalYawControlType(GIMBAL_CONTROL_TYPE_ANGLE);
                 gimbal_.SetYawOmegaFeedforword(0.0f);
-                gimbal_.SetTargetYawOmega(-(yaw_angle_pid_.GetOut()));
             break;
             case CHASSIS_SPIN_COUNTER_CLOCK_WISE: // 疯车保护
-                chassis_.SetTargetVxInGimbal(0.0f); 
-                chassis_.SetTargetVyInGimbal(0.0f); 
-                chassis_.SetTargetVelocityRotation(0.0f);
-                gimbal_.motor_yaw_.CanSendExit();
-                gimbal_.motor_pitch_.CanSendExit();
+                chassis_.Exit();
+                gimbal_.Exit();
             break;
             default:
             // do nothing
             break; 
         };
-
-
-        /********************** 调试信息 ***********************/   
-        // debug_tools_.VofaSendFloat(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
-        debug_tools_.VofaSendFloat(virtual_pitch_angle_);
-        debug_tools_.VofaSendFloat(gimbal_.GetPitchNowAngleNoncumulative());
-        // debug_tools_.VofaSendFloat(gimbal_.motor_yaw_.GetNowAngle());
-        // debug_tools_.VofaSendFloat(normalize_angle_pm_pi(gimbal_.GetNowYawAngle()/0.8f));
-        // debug_tools_.VofaSendFloat(gimbal_.GetNowPitchOmega());
-        // debug_tools_.VofaSendFloat((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
-        // debug_tools_.VofaSendFloat(gimbal_.GetNowPitchAngle());
-        // debug_tools_.VofaSendFloat(virtual_pitch_angle_);
-        // debug_tools_.VofaSendFloat(yaw_err);
-        debug_tools_.VofaSendFloat(mcu_comm_.mcu_autoaim_data_.pitch_f);
-        // 调试帧尾部
-        debug_tools_.VofaSendTail();
 
 
         /********************** mini PC ***********************/   
@@ -204,10 +142,10 @@ void Robot::Task()
         // memcpy(&mcu_comm_.mcu_autoaim_data_.yaw_f,mcu_comm_.mcu_autoaim_data_.yaw,sizeof(float));
         // virtual_yaw_angle_ -= mcu_comm_.mcu_autoaim_data_.yaw_f;
         // 回传云台电机角度数据
-        mcu_comm_.mcu_send_data_.armor = 0x00;
-        mcu_comm_.mcu_send_data_.yaw = -yaw_err;
-        mcu_comm_.mcu_send_data_.pitch = -gimbal_.GetPitchNowAngleNoncumulative();
-        mcu_comm_.CanSendCommand();
+        // mcu_comm_.mcu_send_data_.armor = 0x00;
+        // mcu_comm_.mcu_send_data_.yaw = -yaw_err;
+        // mcu_comm_.mcu_send_data_.pitch = -gimbal_.GetPitchNowAngleNoncumulative();
+        // mcu_comm_.CanSendCommand();
 
         
         /********************** 超级电容 ***********************/   
@@ -221,6 +159,26 @@ void Robot::Task()
         supercap_.SetPowerLimitMax(100);
         supercap_.SetChargePower(50);
         
+
+        /********************** 调试信息 ***********************/   
+        // debug_tools_.VofaSendFloat(mcu_comm_.mcu_imu_data_.yaw_total_angle_f);
+        // debug_tools_.VofaSendFloat(virtual_pitch_angle_);
+        debug_tools_.VofaSendFloat(gimbal_.GetPitchNowAngleNoncumulative());
+        debug_tools_.VofaSendFloat(gimbal_.GetNowPitchOmega());
+        debug_tools_.VofaSendFloat(gimbal_.GetNowPitchTorque());
+
+        // debug_tools_.VofaSendFloat(gimbal_.motor_yaw_.GetNowAngle());
+        // debug_tools_.VofaSendFloat(normalize_angle_pm_pi(gimbal_.GetNowYawAngle()/0.8f));
+        // debug_tools_.VofaSendFloat(gimbal_.GetNowPitchOmega());
+        // debug_tools_.VofaSendFloat((mcu_comm_data_local.pitch_angle - 127.0f) * (0.3f/128.0f));
+        // debug_tools_.VofaSendFloat(gimbal_.GetNowPitchAngle());
+        // debug_tools_.VofaSendFloat(virtual_pitch_angle_);
+        // debug_tools_.VofaSendFloat(yaw_err);
+        // debug_tools_.VofaSendFloat(mcu_comm_.mcu_autoaim_data_.pitch_f);
+        // 调试帧尾部
+        debug_tools_.VofaSendTail();
+
+
         mcu_comm_data_local_pre = mcu_comm_data_local;
 
         osDelay(pdMS_TO_TICKS(1));// 1khz

@@ -11,16 +11,10 @@
 #ifndef APP_CHASSIS_H_
 #define APP_CHASSIS_H_
 
-#include "FreeRTOS.h"
+
 // module
 #include "dvc_motor_dji.h"
 #include "imu.hpp"
-// bsp
-#include "bsp_log.h"
-#include "bsp_usb.h"
-#include "cmsis_os2.h"
-#include "bsp_usart.h"
-#include "bsp_can.h"
 
 
 class Chassis
@@ -33,6 +27,7 @@ public:
                  motor_chassis_4_;
     void Init();
     void Task();
+    void Exit();
     inline void SetTargetVxInGimbal(float target_vx);
     inline void SetTargetVyInGimbal(float target_vy);
     inline void SetTargetVelocityRotation(float target_velocity_rotation);

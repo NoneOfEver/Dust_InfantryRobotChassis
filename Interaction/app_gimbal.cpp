@@ -8,16 +8,87 @@
  * @copyright Copyright (c) 2025
  * 
  */
+#include "FreeRTOS.h"
 #include "app_gimbal.h"
+#include "alg_pid.h"
 #include "cmsis_os2.h"
 #include "interpolation.hpp"
 #include "alg_math.h"
+#include "low_pass_filter.hpp"
 
 void Gimbal::Init()
 {
     // 6220电机初始化
     motor_yaw_.Init(&hfdcan3, 0x12, 0x01,MOTOR_DM_CONTROL_METHOD_NORMAL_MIT,3.14159f);
     motor_pitch_.Init(&hfdcan3, 0x11, 0x02);
+
+    //yaw轴角度环PID初始化
+    yaw_angle_pid_.Init(
+        100.0f,
+        5.0f,
+        9.0f,
+        44.0f,
+        0.0f,
+        44.0f,
+        0.001f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        PID_D_First_DISABLE,
+        0.01f  
+    );
+    //pitch轴角度环PID初始化
+    pitch_angle_pid_.Init(
+        350.0f,
+        160.0f,
+        11.0f,
+        44.0f,
+        0.0f,
+        44.0f,
+        0.001f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        PID_D_First_DISABLE,
+        0.01f  
+    );
+    //yaw轴速度环PID初始化
+    yaw_omega_pid_.Init(
+        0.06f,
+        0.008f,
+        0.000108f,
+        0.1f,
+        3.0f,
+        9.9f,
+        0.001f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        PID_D_First_DISABLE,
+        0.01f
+    );
+    //pitch轴速度环PID初始化
+    pitch_omega_pid_.Init(
+        0.06f,
+        0.008f,
+        0.000108f,
+        0.1f,
+        3.0f,
+        9.9f,
+        0.001f,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f,
+        PID_D_First_DISABLE,
+        0.01f
+    );
+    // yaw轴速度环低通滤波器初始化
+    yaw_omega_filter_.Init(15.0f,0.001f);
+    pitch_omega_filter_.Init(15.0f,0.001f);
 
     motor_yaw_.CanSendClearError();
     motor_pitch_.CanSendClearError();
@@ -28,23 +99,20 @@ void Gimbal::Init()
     motor_pitch_.CanSendEnter();
     osDelay(1000);
 
-    // motor_yaw_.SetKp(0);
     motor_yaw_.SetKp(0); //MIT模式kp
-    // motor_pitch_.SetKp(3); // 3
     motor_pitch_.SetKp(0);//26
 
-    motor_yaw_.SetKd(0.06f); // MIT模式kd
-    // motor_pitch_.SetKd(0.03);
+    motor_yaw_.SetKd(0.0f); // MIT模式kd
     motor_pitch_.SetKd(0.06f);//0.06
 
-    // motor_yaw_.SetControlAngle(0);
-    // motor_pitch_.SetControlAngle(-0.3);
+    motor_yaw_.SetControlAngle(0);
+    motor_pitch_.SetControlAngle(0);
 
     motor_yaw_.SetControlOmega(0);
     motor_pitch_.SetControlOmega(0);
 
-    // motor_yaw_.SetControlTorque(0.2);
-    // motor_pitch_.SetControlTorque(0.1);
+    motor_yaw_.SetControlTorque(0);
+    motor_pitch_.SetControlTorque(0);
 
     motor_yaw_.Output();
     // osDelay(pdMS_TO_TICKS(10));
@@ -55,10 +123,14 @@ void Gimbal::Init()
         .stack_size = 512,
         .priority = (osPriority_t) osPriorityNormal
     };
-    // 启动任务，将 this 传入
     osThreadNew(Gimbal::TaskEntry, this, &kGimbalTaskAttr);
 }
 
+void Gimbal::Exit()
+{
+    motor_yaw_.CanSendExit();
+    motor_pitch_.CanSendExit();
+}
 
 /**
  * @brief 自身解算
@@ -81,9 +153,40 @@ void Gimbal::SelfResolution()
 
     now_pitch_omega_ = motor_pitch_.GetNowOmega();
     now_yaw_omega_   = motor_yaw_.GetNowOmega();
-    // yaw_angle_pid_.SetNow(now_yaw_angle_);
-    // yaw_angle_pid_.CalculatePeriodElapsedCallback();
-    // target_yaw_omega_ = yaw_angle_pid_.GetOut();
+    
+    now_pitch_torque_ = motor_pitch_.GetNowTorque();
+    now_yaw_torque_ = motor_yaw_.GetNowTorque();
+
+    // yaw轴角度环
+    yaw_angle_pid_.SetTarget(0);
+    float yaw_err = CalcYawError(virtual_yaw_angle_, normalize_angle_pm_pi(GetNowYawAngle()/0.8f));
+    yaw_angle_pid_.SetNow(yaw_err);
+    yaw_angle_pid_.CalculatePeriodElapsedCallback();
+    if(yaw_control_type_ == GIMBAL_CONTROL_TYPE_ANGLE){
+        SetTargetYawOmega(-yaw_angle_pid_.GetOut());
+    }else if(yaw_control_type_ == GIMBAL_CONTROL_TYPE_OMEGA){
+        SetTargetYawOmega(GetTargetYawOmega() + GetYawOmegaFeedforword());
+    }
+    // yaw轴速度环
+    // yaw_omega_pid_.SetTarget(yaw_angle_pid_.GetOut());
+    // float filtered_omega_out = yaw_omega_filter_.Update(GetTargetYawOmega());
+    yaw_omega_pid_.SetTarget(GetTargetYawOmega());
+    float filtered_omega = yaw_omega_filter_.Update(GetNowYawOmega());
+    yaw_omega_pid_.SetNow(filtered_omega);
+    yaw_omega_pid_.CalculatePeriodElapsedCallback();
+
+    // pitch轴角度环
+    // pitch_angle_pid_.SetTarget(virtual_pitch_angle_);
+    pitch_angle_pid_.SetTarget(virtual_pitch_angle_);
+    pitch_angle_pid_.SetNow(GetPitchNowAngleNoncumulative());
+    pitch_angle_pid_.CalculatePeriodElapsedCallback();
+    SetTargetPitchOmega(pitch_angle_pid_.GetOut());
+    
+    // pitch轴速度环
+    pitch_omega_pid_.SetTarget(GetTargetPitchOmega());
+    float pitch_filtered_omega = pitch_omega_filter_.Update(GetNowPitchOmega());
+    pitch_omega_pid_.SetNow(pitch_filtered_omega);
+    pitch_omega_pid_.CalculatePeriodElapsedCallback();
 
     // // pitch轴角度归化到±PI / 2之间
     // now_pitch_angle_ = Math_Modulus_Normalization(-motor_pitch_.GetNowAngle(), 2.0f * PI);
@@ -97,20 +200,8 @@ void Gimbal::SelfResolution()
 void Gimbal::Output()
 {
 
-    // // 云台位控
-    // if (gimbal_control_type_ == GIMBAL_CONTROL_TYPE_MANUAL)         // 无自瞄介入
-    // {
-    //     // do nothing
-    // }else if (gimbal_control_type_ == GIMBAL_CONTROL_TYPE_AUTOAIM){ // 有自瞄矫正
-    //     MotorNearestTransposition();
-    //     yaw_angle_pid_.SetTarget(now_yaw_angle_); // 加视觉的相对偏移量
-    //     yaw_angle_pid_.CalculatePeriodElapsedCallback();
-    //     target_yaw_omega_ = yaw_angle_pid_.GetOut();
-    // }
-
-    motor_yaw_.SetControlOmega(target_yaw_omega_);
-    // motor_pitch_.SetControlAngle(target_pitch_angle_);
-    // motor_pitch_.SetControlAngle(pitch_angle_interpolation.Output());
+    // motor_yaw_.SetControlOmega(target_yaw_omega_ + yaw_omega_feedforword_);
+    motor_yaw_.SetControlTorque(yaw_omega_pid_.GetOut());
     motor_pitch_.SetControlOmega(target_pitch_omega_);
     motor_yaw_.Output();
     motor_pitch_.Output();
