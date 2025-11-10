@@ -73,7 +73,10 @@ include_directories(
         Communication/
         Drivers/
         ThirdParty/SEGGER/Config
-        ThirdParty/SEGGER/RTT
+        ThirdParty/SEGGER/Sample/COMM
+        ThirdParty/SEGGER/Sample/FreeRTOSV10
+        ThirdParty/SEGGER/Sample/SEGGER
+
 )
 
 add_definitions(
