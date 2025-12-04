@@ -30,7 +30,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends ninja-build cmake gcc-arm-none-eabi libnewlib-arm-none-eabi binutils-arm-none-eabi
-
+       
+      - name: arm-none-eabi-gcc GNU Arm Embedded Toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1.11.1
+        
       - name: Show toolchain versions
         run: |
           arm-none-eabi-gcc --version || true
