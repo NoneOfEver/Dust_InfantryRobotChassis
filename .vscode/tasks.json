@@ -1,33 +1,92 @@
 {
     "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "board",
+            "type": "pickString",
+            "description": "选择目标板卡",
+            "options": [
+                "dm-h723"
+            ],
+            "default": "dm-h723"
+        },
+        {
+            "id": "firmware",
+            "type": "pickString",
+            "description": "选择固件",
+            "options": [
+                "shoot_test",
+                "DownBoard_Interaction"
+            ],
+            "default": "DownBoard_Interaction"
+        }
+    ],
     "tasks": [
+        {
+            "label": "Configure Project",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "-S", ".",
+                "-B", "build/${input:board}-${input:firmware}",
+                "-DBOARD=${input:board}",
+                "-DFIRMWARE=${input:firmware}"
+            ],
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Build Project",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build", "build",
+                "--config", "Debug",
+                "--parallel"
+            ],
+            "problemMatcher": ["$gcc"],
+            "dependsOn": ["Configure Project"]
+        },
         {
             "label": "Flash STM32",
             "type": "shell",
             "command": "openocd",
             "args": [
-                "-f", "${workspaceRoot}/Board/dm-h723/config/openocd_dap.cfg",
+                "-f", "${workspaceRoot}/Board/${input:board}/config/openocd_dap.cfg",
                 "-c", "program build/Dust_InfantryRobotChassis.bin verify reset exit 0x08000000"
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "Build and Flash",
+            "dependsOn": [
+                "Configure Project",
+                "Build Project",
+                "Flash STM32"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "label": "clang-tidy full scan",
             "type": "shell",
             "command": "run-clang-tidy",
             "args": [
-                "-p",
-                "build",
-                "App/**/*.cpp",
-                "Bsp/**/*.cpp",
-                "Modules/**/*.cpp"
+                "-p", "build",
+                "Common/Algorithm/*.cpp",
+                "Common/Device/*.cpp",
+                "Common/Drivers/*.cpp",
+                "Common/Communication/*.cpp",
+                "Firmware/${input:firmware}/*.cpp"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "problemMatcher": ["$gcc"],
             "group": {
-                "kind": "build",
+                "kind": "test",
                 "isDefault": false
             },
             "presentation": {

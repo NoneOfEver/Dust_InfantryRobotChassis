@@ -1,4 +1,10 @@
-#此文件从模板自动生成! 请勿更改!
+# 添加板卡和固件选择选项
+set(BOARD "dm-h723" CACHE STRING "Target board")
+set(FIRMWARE "DownBoard_Interaction" CACHE STRING "Target firmware")
+
+# 包含板卡特定配置
+include(Board/${BOARD}/board.cmake)
+
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.22)
@@ -20,15 +26,10 @@ set(CMAKE_C_STANDARD 11)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-#Uncomment for hardware floating point
-add_compile_definitions(ARM_MATH_CM4;ARM_MATH_MATRIX_CHECK;ARM_MATH_ROUNDING)
-add_compile_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
-add_link_options(-mfloat-abi=hard -mfpu=fpv4-sp-d16)
-
-#Uncomment for software floating point
+# 软件浮点选项（如果需要）
 #add_compile_options(-mfloat-abi=soft)
 
-add_compile_options(-mcpu=cortex-m7 -mthumb -mthumb-interwork)
+# 通用编译选项 (无关芯片架构)
 add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-length=0)
 
 # uncomment to mitigate c++17 absolute addresses warnings
@@ -37,6 +38,7 @@ add_compile_options(-ffunction-sections -fdata-sections -fno-common -fmessage-le
 # Enable assembler files preprocessing
 add_compile_options($<$<COMPILE_LANGUAGE:ASM>:-x$<SEMICOLON>assembler-with-cpp>)
 
+# 构建类型优化选项
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
     message(STATUS "Maximum optimization for speed")
     add_compile_options(-Ofast)
@@ -52,8 +54,8 @@ else ()
 endif ()
 
 include_directories(
-        Board/dm-h723/
-        Board/dm-h723/Inc 
+        Board/${BOARD}/
+        Board/${BOARD}/Inc 
         ThirdParty/STM32H7xx_HAL_Driver/Inc 
         ThirdParty/STM32H7xx_HAL_Driver/Inc/Legacy 
         ThirdParty/FreeRTOS/Source/include 
@@ -64,49 +66,43 @@ include_directories(
         ThirdParty/ARM/DSP/Inc
         ThirdParty/CMSIS/Device/ST/STM32H7xx/Include 
         ThirdParty/CMSIS/Include 
-)
-
-include_directories(
-        Interaction/
-        Algorithm/
-        Device/
-        Communication/
-        Drivers/
         ThirdParty/SEGGER/Config
         ThirdParty/SEGGER/Sample/FreeRTOSV10
         ThirdParty/SEGGER/SEGGER
-
 )
 
-add_definitions(
-    -DDEBUG 
-    -DUSE_PWR_LDO_SUPPLY 
-    -DUSE_HAL_DRIVER 
-    -DSTM32H723xx
+include_directories(
+        Firmware/${FIRMWARE}/
+        Common/Algorithm/
+        Common/Device/
+        Common/Communication/
+        Common/Drivers/
 )
+
+# 这些定义现在在board.cmake中处理
 
 file(
     GLOB_RECURSE SOURCES 
-    "Board/dm-h723/*.*" 
+    "Board/${BOARD}/*.*" 
     "ThirdParty/*.*" 
-    "Interaction/*.*" 
-    "Communication/*.*"
-    "Drivers/*.*" 
-    "Algorithm/*.*"
-    "Device/*.*"
+    "Firmware/${FIRMWARE}/*.*" 
+    "Common/Algorithm/*.*" 
+    "Common/Communication/*.*"
+    "Common/Drivers/*.*" 
+    "Common/Device/*.*"
 )
 
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/Board/dm-h723/STM32H723VGTX_FLASH.ld)
+# 链接脚本路径由board.cmake提供
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
-add_link_options(-mcpu=cortex-m7 -mthumb -mthumb-interwork)
+# 链接选项中的芯片架构选项已移到board.cmake
 add_link_options(-T ${LINKER_SCRIPT})
 
 link_directories(${CMAKE_SOURCE_DIR}/ThirdParty/ARM/DSP/Lib)
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
+add_executable(${PROJECT_NAME}.elf ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME}.elf libarm_cortexM7lfsp_math.a)
+target_link_libraries(${PROJECT_NAME}.elf ${MATH_LIB})
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)

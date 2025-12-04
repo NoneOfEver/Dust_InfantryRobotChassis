@@ -13,7 +13,6 @@
 #ifndef _USER_LIB_H
 #define _USER_LIB_H
 #include "stdint.h"
-#include "main.h"
 #include "cmsis_os.h"
 
 enum
