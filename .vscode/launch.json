@@ -1,11 +1,10 @@
 {
     "version": "0.2.0",
     "configurations": [
-        // 使用dap-link(如无线调试器时的参考配置)
         {
-            "name": "DAPlink",
+            "name": "InfantryRobotChassis DAPlink",
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/Dust_InfantryRobotChassis.elf",
+            "executable": "${workspaceRoot}/build/dm-h723-DownBoard_Interaction/FW.elf",
             "request": "launch",
             "type": "cortex-debug",
             "device": "STM32H723VG",
@@ -16,11 +15,10 @@
             ],
             "runToEntryPoint": "main",
         },
-        // 使用j-link进行调试时的参考配置
         {
-            "name": "Jlink",
+            "name": "InfantryRobotChassis Jlink",
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/Dust_InfantryRobotChassis.elf",
+            "executable": "${workspaceRoot}/build/dm-h723-DownBoard_Interaction/FW.elf",
             "request": "launch",
             "type": "cortex-debug",
             "device": "STM32H723VG",
@@ -32,10 +30,11 @@
             "rtos": "FreeRTOS",
         
         },
+        // Attach configurations
         {
-            "name": "DAP-attach",
+            "name": "InfantryRobotChassis DAP-attach",
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/Dust_InfantryRobotChassis.elf", 
+            "executable": "${workspaceRoot}/build/dm-h723-DownBoard_Interaction/FW.elf",
             "request": "attach",
             "type": "cortex-debug",
             "device": "STM32H723VG",
@@ -46,9 +45,9 @@
             ],
         },
         {
-            "name": "Jlink-attach",
+            "name": "InfantryRobotChassis Jlink-attach",
             "cwd": "${workspaceFolder}",
-            "executable": "${workspaceRoot}/build/Dust_InfantryRobotChassis.elf",
+            "executable": "${workspaceRoot}/build/dm-h723-DownBoard_Interaction/FW.elf",
             "request": "attach",
             "type": "cortex-debug",
             "device": "STM32H723VG",

@@ -182,7 +182,6 @@ void Robot::Task()
         // 调试帧尾部
         debug_tools_.VofaSendTail();
 
-
         mcu_comm_data_local_pre = mcu_comm_data_local;
 
         osDelay(pdMS_TO_TICKS(1));// 1khz

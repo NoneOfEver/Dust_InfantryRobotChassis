@@ -9,10 +9,10 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.22)
 
-# specify cross-compilers and tools
+# 明确指定生成器和工具链
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
 set(CMAKE_CXX_COMPILER arm-none-eabi-g++)
-set(CMAKE_ASM_COMPILER  arm-none-eabi-gcc)
+set(CMAKE_ASM_COMPILER arm-none-eabi-gcc)
 set(CMAKE_AR arm-none-eabi-ar)
 set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_OBJDUMP arm-none-eabi-objdump)
@@ -20,7 +20,7 @@ set(SIZE arm-none-eabi-size)
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # project settings
-project(Dust_InfantryRobotChassis C CXX ASM)
+project(FW C CXX ASM)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
@@ -100,14 +100,20 @@ add_link_options(-T ${LINKER_SCRIPT})
 
 link_directories(${CMAKE_SOURCE_DIR}/ThirdParty/ARM/DSP/Lib)
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME}.elf ${MATH_LIB})
+target_link_libraries(${PROJECT_NAME} ${MATH_LIB})
 
 set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
 set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
 
-add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
-        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
-        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-        COMMENT "Building ${HEX_FILE} Building ${BIN_FILE}")
+# 创建固件保留目录
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/firmware_releases)
+
+# 构建后步骤：生成固件文件并复制到保留目录
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}> ${HEX_FILE}
+        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}> ${BIN_FILE}
+        COMMAND ${CMAKE_COMMAND} -E copy ${BIN_FILE} ${CMAKE_SOURCE_DIR}/firmware_releases/${BOARD}_${FIRMWARE}.bin
+        COMMAND ${CMAKE_COMMAND} -E copy ${HEX_FILE} ${CMAKE_SOURCE_DIR}/firmware_releases/${BOARD}_${FIRMWARE}.hex
+        COMMENT "Building firmware and saving to releases")
