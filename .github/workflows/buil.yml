@@ -1,0 +1,94 @@
+name: CI - Build Multi-Board Multi-Firmware
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - '**'
+
+# 默认并行矩阵（把你要的板卡和固件列在这里）
+# 修改下面的 board/firmware 列表以匹配你的仓库
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        board: [ dm-h723 ]                       # <-- 在此添加更多板卡
+        firmware: [ DownBoard_Interaction, shoot_test ]  # <-- 在此添加更多固件
+    name: Build ${{ matrix.board }} - ${{ matrix.firmware }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ninja-build cmake gcc-arm-none-eabi binutils-arm-none-eabi
+
+      - name: Show toolchain versions
+        run: |
+          arm-none-eabi-gcc --version || true
+          ninja --version || true
+          cmake --version
+
+      - name: Configure CMake
+        run: |
+          BUILD_DIR="build/${{ matrix.board }}-${{ matrix.firmware }}"
+          rm -rf "${BUILD_DIR}"
+          cmake -S . -B "${BUILD_DIR}" -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}/cmake/toolchain-arm-none-eabi.cmake" \
+            -DBOARD="${{ matrix.board }}" \
+            -DFIRMWARE="${{ matrix.firmware }}"
+
+      - name: Build
+        run: |
+          BUILD_DIR="build/${{ matrix.board }}-${{ matrix.firmware }}"
+          cmake --build "${BUILD_DIR}" -- -j$(nproc)
+
+      - name: Collect artifacts
+        run: |
+          BUILD_DIR="build/${{ matrix.board }}-${{ matrix.firmware }}"
+          mkdir -p artifacts
+          # 搜索 .bin .hex .elf 放到 artifacts 目录（可根据输出名调整）
+          find "${BUILD_DIR}" -maxdepth 2 -type f \( -name '*.bin' -o -name '*.hex' -o -name '*.elf' \) -exec cp {} artifacts/ \; || true
+          ls -lah artifacts || true
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.board }}-${{ matrix.firmware }}
+          path: artifacts/
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release_artifacts
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release_artifacts/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
