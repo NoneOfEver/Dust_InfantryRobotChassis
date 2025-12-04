@@ -2,7 +2,7 @@
 // Created by noe on 25-8-3.
 //
 
-#include "dvc_PC_comm.h"
+#include "dvc_pc_comm.h"
 #include "bsp_usb.h"
 
 uint8_t* g_usb_rx_buffer;
